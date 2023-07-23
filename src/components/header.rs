@@ -2,6 +2,7 @@ use leptos::*;
 
 use crate::components::instance::*;
 
+// The Navbar Header for the UI
 #[component]
 pub fn Header(cx: Scope) -> impl IntoView {
     let logo_source = match get_instance_details().unwrap().no_logo_text {

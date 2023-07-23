@@ -30,7 +30,7 @@ pub fn App(cx: Scope) -> impl IntoView {
         // Sets the Bootstrap dark-theme attribute
         <Html attributes=AdditionalAttributes::from(vec![("data-bs-theme", "dark")]) />
 
-        // Sets the favicon, which for some reason isn't working now? Not sure why... Could be an Axum thing perhaps?
+        // Sets the favicon, which seems to work best as an .ico file
         <Link rel="icon" type_="image/x-icon" href={format!("/assets/{}", favicon)} />
 
         // Inject the Bootstrap stylesheet into the <head> of the page

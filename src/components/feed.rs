@@ -11,6 +11,14 @@ use crate::api::structs::*;
 use crate::api::*;
 use crate::components::*;
 
+// TODO - feed.rs:
+// onclick functionality for voting, favoriting, crossposting, and reporting
+// Better handling for mobile layouts, including possibly removing voting buttons on mobile
+// Implement community avatars for posts in sensible manner
+// Build media popups for images
+// Implement URL preview images for external links
+// Finish fleshing out PostItem for stuff like language, edited status, date, etc
+
 // The home page feed column that shows the Posts list
 #[component]
 pub fn Feed(cx: Scope) -> impl IntoView {
@@ -20,9 +28,6 @@ pub fn Feed(cx: Scope) -> impl IntoView {
             .with(|q| q.get("page").and_then(|page| page.parse::<i32>().ok()))
             .unwrap_or(1)
     };
-
-    // Component signal to handle pagination
-    let (page_count, set_count) = create_signal(cx, 0);
 
     // Variable that holds the returned GetPostsResponse from the API
     let posts = create_resource(cx, page, move |page| async move {
@@ -37,7 +42,7 @@ pub fn Feed(cx: Scope) -> impl IntoView {
             auth: None,
             community_id: None,
             community_name: None,
-            limit: None,
+            limit: Some(20),
             page: Some(page),
             post_id: None,
             saved_only: None,
@@ -83,14 +88,18 @@ pub fn Feed(cx: Scope) -> impl IntoView {
                 }}
                 </Transition>
 
-                // Pagination for the feed. currently broken while trying to figure out proper signalling
-                // <nav aria-label="Feed Page Navigation">
-                //     <ul class="pagination justify-content-center">
-                //         <li class="page-item"><A class="page-link" href={format!("?page={}", page_count)} on:click=move |_| {set_count.update(|n| *n -= 1);} >Previous</A></li>
-                //         <li class="page-item"><A class="page-link" href={format!("?page={}", page_count)}>Page: {page}</A></li>
-                //         <li class="page-item"><A class="page-link" href={format!("?page={}", page_count)} on:click=move |_| {set_count.update(|n| *n += 1);} >Next</A></li>
-                //     </ul>
-                // </nav>
+                // Pagination for the feed
+                <nav aria-label="Feed Page Navigation">
+                    <ul class="pagination justify-content-center">
+                        {move || if page() > 1 {
+                            view! { cx, <li class="page-item"><A class="page-link" href= move || format!("?page={}", page() - 1) >Previous</A></li>}
+                        } else {
+                            view! { cx, <li class="page-item disabled"><A class="page-link" href="" >Previous</A></li>}
+                        }}
+                        <li class="page-item"><A class="page-link" href=move || format!("/")>Page: {page}</A></li>
+                        <li class="page-item"><A class="page-link" href=move || format!("?page={}", page() + 1) >Next</A></li>
+                    </ul>
+                </nav>
             </div>
 
     }
@@ -130,7 +139,12 @@ pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
     let creator_name = post.creator.name;
     // This needs a similar check as above, I still need to make a default placeholder for a community avatar
     let community_avatar = post.community.icon;
-    let community_name = post.community.name;
+    // This needs to be handled better, it thinks that some local communities are external, possibly due to cross-posting
+    let community_name = if post.post.local {
+        post.community.name
+    } else {
+        format!("{}@{}", post.community.name, post.community.title)
+    };
     let comment_count = post.counts.comments;
 
     view! { cx,
@@ -177,7 +191,7 @@ pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                         </div>
                         <div class="col-sm-11">
                             <p>
-                                {creator_name}" @ "{community_name}
+                                {creator_name}" in "{community_name}
                             </p>
                         </div>
                     </div>
