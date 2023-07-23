@@ -45,7 +45,7 @@ You can follow the [instructions](https://github.com/leptos-rs/leptos) from the 
 
 3. Install the WASM compliation target by running `rustup target add wasm32-unknown-unknown` from your terminal ater you have set the Rust default to be `nightly`.
 
-4. Leptos uses it's own build tool for working with Axum (and Actix too), hot reloading, and more. You will need this to fully work with the project as intended. To install it, run `cargo install cargo-leptos` from your terminal.
+4. Leptos uses it's own build tool for working with Axum (and Actix too), hot reloading, and more. You will need this to fully work with the project as intended. To install it, run `cargo install cargo-leptos` from your terminal. **Note:** Axum uses OpenSSL as part of its build chain, which will require the installation of the OpenSSL developer libraries for your platform of choice. On Debian/Ubuntu, this can be installed by running `sudo apt install libssl-dev` (on Debian 12, I encountered an error that also required the installtion of `pkg-config` as well. If you still get a compilation error after installing the OpenSSL dev libraries, try installing `pkg-config` and see if that solves the issue). While on Fedora/RHEL/OpenSuse systems this can be done by installing the `libopenssl-devel` (or similarly named) package from your repositories. It may be diferent on other distros as well, you will need to search in your repositories for what OpenSSL dev libs to install.
 
 5. Fork this project and place it in a directory of your choosing.
 
