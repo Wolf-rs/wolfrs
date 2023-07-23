@@ -1,0 +1,39 @@
+[instance]
+# Required: The name of your instance
+name = "Pawb Social"
+
+# Optional (Strongly Suggested): The slogan of your instance, leave blank if none
+slogan = "For Furries, By Furries"
+
+# Required: The URL of your instance
+url = "https://pawb.social"
+
+# Required: The API version to use, default is v3
+api_version = "v3"
+
+# Optional: The donation URL for your instance
+donation_url = "https://ko-fi.com/pawbsocial"
+
+# Required as per the AGPL: The URL for the public source code of your instance
+source_code_url = "https://github.com/pawb/social"
+
+# Required: documentation_url for your instance
+documentation_url = "https://join-lemmy.org/docs/index.html"
+
+# Required: The name of your logo image file
+logo_name = "pawb-social-logo-notext.png"
+
+# Required: Set to false if you wish to use a logo with text included in it, default is true
+no_logo_text = true
+
+# Optional, Unless no_logo_text Set To False: The name of your text-logo image file
+logo_text_name = "pawb-social-logo.png"
+
+# Required: The width of the logo image in pixels, default for square logos is 25
+logo_width = 25
+
+# Required: The height of the logo image in pixels, default for square logos is 25
+logo_height = 25
+
+# Optional: The name of the favicon image file, default is favicon.png
+favicon_name = "favicon.ico"
