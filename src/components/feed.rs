@@ -6,7 +6,7 @@ use serde::Serialize;
 use serde_json::json;
 use serde_json::Value;
 
-use crate::api::post::get_posts;
+use crate::api::posts::get_posts;
 use crate::api::structs::*;
 use crate::api::*;
 use crate::components::*;
@@ -16,7 +16,7 @@ use crate::components::*;
 // Better handling for mobile layouts, including possibly removing voting buttons on mobile
 // Implement community avatars for posts in sensible manner
 // Build media popups for images
-// Implement URL preview images for external links
+// Implement URL preview images for external links (This seems to already be handled by the backend?)
 // Finish fleshing out PostItem for stuff like language, edited status, date, etc
 
 // The home page feed column that shows the Posts list
@@ -34,7 +34,8 @@ pub fn Feed(cx: Scope) -> impl IntoView {
         // This constructs the proper API URL for GetPosts
         let url_constructor = ApiUrlConstructor {
             endpoint: api_endpoints::GetEndpoint::GET_POSTS.to_string(),
-            params: "",
+            id: None,
+            params: None,
         };
 
         // This assembles the GetPosts request form
@@ -51,7 +52,7 @@ pub fn Feed(cx: Scope) -> impl IntoView {
         };
 
         // This is where the API is called for GetPosts and the GetPostsResponse is returned
-        get_posts(cx, &api_url_constructor(cx, url_constructor, get_form))
+        get_posts(cx, &api_url_builder(cx, url_constructor, get_form))
             .await
             .ok()
     });
@@ -92,7 +93,7 @@ pub fn Feed(cx: Scope) -> impl IntoView {
                 <nav aria-label="Feed Page Navigation">
                     <ul class="pagination justify-content-center">
                         {move || if page() > 1 {
-                            view! { cx, <li class="page-item"><A class="page-link" href= move || format!("?page={}", page() - 1) >Previous</A></li>}
+                            view! { cx, <li class="page-item"><A class="page-link" href=move || format!("?page={}", page() - 1) >Previous</A></li>}
                         } else {
                             view! { cx, <li class="page-item disabled"><A class="page-link" href="" >Previous</A></li>}
                         }}
@@ -106,8 +107,9 @@ pub fn Feed(cx: Scope) -> impl IntoView {
 }
 
 // The Posts list containing the Post items
+// Suggestion: Implement collapsing accordions for multiple posts in a row from the same community?
 #[component]
-pub fn PostsList(cx: Scope, posts: MaybeSignal<Vec<PostView>>) -> impl IntoView {
+fn PostsList(cx: Scope, posts: MaybeSignal<Vec<PostView>>) -> impl IntoView {
     view! { cx,
       <ul>
       {posts.get().into_iter()

@@ -5,6 +5,7 @@ use leptos_router::*;
 
 use crate::components::{footer::Footer, header::Header, instance::*};
 use crate::pages::home::Home;
+use crate::pages::post::Post;
 
 // Boilerplate for when the pages are created
 // use crate::pages::{
@@ -64,7 +65,7 @@ pub fn App(cx: Scope) -> impl IntoView {
                     // <Route path="/login" view=|cx| view! { cx, <Login/> }/>
                     // <Route path="/mod_log" view=|cx| view! { cx, <ModLog/> }/>
                     // <Route path="/notifications" view=|cx| view! { cx, <Notifications/> }/>
-                    // <Route path="/post/:id" view=|cx| view! { cx, <Post/> }/>
+                    <Route path="/post/:id" view=|cx| view! { cx, <Post/> }/>
                     // <Route path="/reports" view=|cx| view! { cx, <Reports/> }/>
                     // <Route path="/search" view=|cx| view! { cx, <Search/> }/>
                     // <Route path="/settings" view=|cx| view! { cx, <Settings/> }/>

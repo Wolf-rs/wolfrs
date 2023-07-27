@@ -5,7 +5,7 @@ pub mod community;
 pub mod etc;
 pub mod federation;
 pub mod modlog;
-pub mod post;
+pub mod posts;
 pub mod private_message;
 pub mod search;
 pub mod site;
@@ -20,7 +20,7 @@ use crate::api::structs::ApiUrlConstructor;
 use crate::components::instance::*;
 
 // This function is used to construct the correct url to use for the api
-pub fn api_url_constructor<T: Serializable + serde::Serialize>(
+pub fn api_url_builder<T: Serializable + serde::Serialize>(
     cx: Scope,
     url_constructor: ApiUrlConstructor,
     form: T,
@@ -54,8 +54,6 @@ where
         .text()
         .await?;
 
-    println!("{:#?}", json.clone());
-
     // abort in-flight requests if the Scope is disposed
     // i.e., if we've navigated away from this page
     leptos::on_cleanup(cx, move || {
@@ -76,6 +74,8 @@ where
     let client = reqwest::Client::new();
 
     let json = client.get(path).send().await?.text().await?;
+
+    println!("Test in mod.rs: {:#?}", json.clone());
 
     // Return the error response json as an error
     Response::de(&json).map_err(|_| anyhow!(json.clone()))

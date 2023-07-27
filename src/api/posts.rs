@@ -9,3 +9,7 @@ use crate::api::*;
 pub async fn get_posts(cx: Scope, endpoint: &str) -> Result<GetPostsResponse> {
     api_get::<GetPostsResponse>(cx, endpoint).await
 }
+
+pub async fn get_post(cx: Scope, endpoint: &str) -> Result<GetPostResponse> {
+    api_get::<GetPostResponse>(cx, endpoint).await
+}

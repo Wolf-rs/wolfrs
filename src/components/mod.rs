@@ -1,8 +1,10 @@
 pub mod bindings;
+pub mod comments;
 pub mod feed;
 pub mod footer;
 pub mod header;
 pub mod instance;
 pub mod notifications;
+pub mod post_view;
 pub mod sidecard;
 pub mod trending;

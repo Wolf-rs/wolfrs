@@ -14,7 +14,8 @@ pub mod api_endpoints {
     impl GetEndpoint {
         pub const GET_BANNED_PERSONS: &str = "user/banned";
         pub const GET_CAPTCHA: &str = "user/get_captcha";
-        pub const GET_COMMENTS: &str = "comment";
+        pub const GET_COMMENT: &str = "comment";
+        pub const GET_COMMENTS: &str = "comment/list";
         pub const GET_COMMUNITY: &str = "community";
         pub const GET_FEDERATED_INSTANCES: &str = "federated_instances";
         pub const GET_MODLOG: &str = "modlog";
@@ -112,10 +113,13 @@ pub mod api_endpoints {
 }
 
 // The struct for the url constructor
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Default)]
 pub struct ApiUrlConstructor {
     pub endpoint: String,
-    pub params: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub params: Option<&'static str>,
 }
 
 // The ErrorResponse struct for the api request functions
@@ -1007,7 +1011,7 @@ pub struct GetComments {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
-pub struct GetCommentResponse {
+pub struct GetCommentsResponse {
     pub comments: Vec<CommentView>,
 }
 
