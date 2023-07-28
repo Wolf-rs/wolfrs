@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 // These are the structs and API endpoints for the Lemmy API.
 // By re-creating these from their HTTP API documentation, I was able to create the necessary tools for interacting with the Lemmy API, without needing to resort to using their Rust crate and thus be subjected to the AGPLv3.
 // There are likely bugs in these structs, as I have already encountered params that were apparently optional when they were not marked as such. If you encounter such an issue, please let me know, or edit the struct param that is causing the issue.
-// This can easily be done by adding the #[serde(skip_serializing_if = "Option::is_none")] attribute above the paramater in question, and then wrapping the param type with Option<>.
+// Most isslues likely can be easily fixed by adding the #[serde(skip_serializing_if = "Option::is_none")] attribute above the paramater in question, and then wrapping the param type with Option<>.
 // This struct will eventually get spun off into it's own crate, that is better documented, to allow others to more easily interact with the Lemmy API, in a wider variety of projects than the could be allowed by the current Rust crate's license.
 
 // The endpoints for the Lemmy HTTP API, as found from here: https://join-lemmy.org/api/classes/LemmyHttp.html
@@ -335,13 +335,12 @@ pub struct Comment {
     pub published: String,
     pub removed: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub updated: Option<i32>,
+    pub updated: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct CommentAggregates {
     pub child_count: i32,
-    pub community_id: i32,
     pub downvotes: i32,
     pub hot_rank: i32,
     pub id: i32,
@@ -372,7 +371,7 @@ pub struct CommentReplyView {
     pub counts: CommentAggregates,
     pub creator: Person,
     pub creator_banned_from_community: bool,
-    pub creator_clocked: bool,
+    pub creator_blocked: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub my_vote: Option<i32>,
     pub post: Post,
@@ -393,7 +392,7 @@ pub struct CommentReport {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolver_id: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub updated: Option<i32>,
+    pub updated: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
@@ -432,7 +431,7 @@ pub struct CommentView {
     pub counts: CommentAggregates,
     pub creator: Person,
     pub creator_banned_from_community: bool,
-    pub creator_clocked: bool,
+    pub creator_blocked: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub my_vote: Option<i32>,
     pub post: Post,
@@ -1068,7 +1067,7 @@ pub struct GetModlogResponse {
     pub added: Vec<ModAddView>,
     pub added_to_community: Vec<ModAddCommunityView>,
     pub admin_purged_comments: Vec<AdminPurgeCommentView>,
-    pub admin_purged_community: Vec<AdminPurgeCommunityView>,
+    pub admin_purged_communities: Vec<AdminPurgeCommunityView>,
     pub admin_purged_persons: Vec<AdminPurgePersonView>,
     pub admin_purged_posts: Vec<AdminPurgePostView>,
     pub banned: Vec<ModBanView>,
@@ -1079,7 +1078,7 @@ pub struct GetModlogResponse {
     pub removed_comments: Vec<ModRemoveCommentView>,
     pub removed_communities: Vec<ModRemoveCommunityView>,
     pub removed_posts: Vec<ModRemovePostView>,
-    pub trasnferred_to_community: Vec<ModTransferCommunityView>,
+    pub transferred_to_community: Vec<ModTransferCommunityView>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]

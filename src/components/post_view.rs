@@ -7,6 +7,17 @@ use crate::api::structs::*;
 use crate::api::*;
 use crate::components::feed::PostItem;
 
+// TODO - post_view.rs:
+// Handle when there is no actual post body for an external link
+// Fix clicking on the PostItem title taking the page to an unreachable route
+// onclick functionality for voting, favoriting, crossposting, and reporting
+// Better handling for mobile layouts
+// Implement community avatars for posts in sensible manner
+// Finish fleshing out PostItem for stuff like language, edited status, date, etc
+// Finish implementing Markdown styling for blockquotes and superscripts (Apparently that's not a gfm thing?)
+// Improve overall styling for the post component box itself
+
+// The component box that holds the post body and contents itself
 #[component]
 pub fn PostView(cx: Scope) -> impl IntoView {
     let params = use_params_map(cx);
@@ -27,14 +38,14 @@ pub fn PostView(cx: Scope) -> impl IntoView {
             params: None,
         };
 
-        // This assembles the GetPosts request form
+        // This assembles the GetPost request form
         let get_form = GetPost {
             auth: None,
             comment_id: None,
             id: Some(id),
         };
 
-        // This is where the API is called for GetPosts and the GetPostsResponse is returned
+        // This is where the API is called for GetPost and the GetPostResponse is returned
         get_post(cx, &api_url_builder(cx, url_constructor, get_form))
             .await
             .ok()
@@ -76,6 +87,7 @@ pub fn PostView(cx: Scope) -> impl IntoView {
                                         </div>
                                      }
                                 }>
+                                    // This is where the Markdown content of the post is rendered.
                                     <div inner_html={markdown::to_html_with_options(res.post_view.post.body.clone().unwrap().as_str(), &Options::gfm()).unwrap()} />
                                 </Suspense>
                             </div>

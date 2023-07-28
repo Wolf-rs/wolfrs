@@ -5,6 +5,15 @@ use crate::api::comment::*;
 use crate::api::structs::*;
 use crate::api::*;
 
+// TODO - comments.rs:
+// onclick functionality for voting, favoriting, crossposting, and reporting
+// Better handling for mobile layouts
+// Build media popups for images(?)
+// Build actual styling for comments
+// Implement a nesting system for comments
+// Finish styling comments component box itself.
+
+// The component box for the comments on a post
 #[component]
 pub fn Comments(cx: Scope) -> impl IntoView {
     let params = use_params_map(cx);
@@ -16,7 +25,7 @@ pub fn Comments(cx: Scope) -> impl IntoView {
             .unwrap()
     };
 
-    // Variable that holds the returned GetPostResponse from the API
+    // Variable that holds the returned GetCommentsResponse from the API
     let comments = create_resource(cx, id, move |id| async move {
         // This constructs the proper API URL for GetPosts
         let url_constructor = ApiUrlConstructor {
@@ -25,7 +34,7 @@ pub fn Comments(cx: Scope) -> impl IntoView {
             params: None,
         };
 
-        // This assembles the GetPosts request form
+        // This assembles the GetComments request form
         let get_form = GetComments {
             auth: None,
             community_id: None,
@@ -40,14 +49,10 @@ pub fn Comments(cx: Scope) -> impl IntoView {
             type_: None,
         };
 
-        // This is where the API is called for GetPosts and the GetPostsResponse is returned
-        let test = get_comments(cx, &api_url_builder(cx, url_constructor, get_form))
+        // This is where the API is called for GetComments and the GetCommentsResponse is returned
+        get_comments(cx, &api_url_builder(cx, url_constructor, get_form))
             .await
-            .ok();
-
-        println!("Test after Get: {:?}", test.clone());
-
-        test
+            .ok()
     });
 
     let err_msg = "Error loading these comments: ";
@@ -84,6 +89,8 @@ pub fn Comments(cx: Scope) -> impl IntoView {
     }
 }
 
+// The component for the comments list
+// May need another component for holding a comment and its replies, TBD...
 #[component]
 fn CommentsList(cx: Scope, comments: MaybeSignal<Vec<CommentView>>) -> impl IntoView {
     view! { cx,
@@ -95,11 +102,14 @@ fn CommentsList(cx: Scope, comments: MaybeSignal<Vec<CommentView>>) -> impl Into
     }
 }
 
+// The component for a single comment
 #[component]
 pub fn CommentItem(cx: Scope, comment_item: MaybeSignal<CommentView>) -> impl IntoView {
     let comment = comment_item.get();
 
     view! { cx,
+        <div>
         {comment.comment.content}
+        </div>
     }
 }

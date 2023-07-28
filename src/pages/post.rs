@@ -1,6 +1,12 @@
 use leptos::*;
 use leptos_router::*;
 
+// TODO - post.rs:
+// Sidecard component still needs to be built
+// Real styling with Bootstrap
+// Ensure mobile layout works as expected
+
+// The main page for viewing a post and its comments.
 use crate::components::{comments::Comments, post_view::PostView};
 #[component]
 pub fn Post(cx: Scope) -> impl IntoView {
@@ -19,8 +25,7 @@ pub fn Post(cx: Scope) -> impl IntoView {
                          }
                     }>
                         <PostView />
-                        // Comments are currently not working. The comments data is loaded from the API, but Anyhow interprets them as having error, so wraps them in an Err() and that breaks things.
-                        //<Comments />
+                        <Comments />
                     </Transition>
                     </div>
 
