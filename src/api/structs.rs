@@ -1035,7 +1035,8 @@ pub struct GetCommunityResponse {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct GetFederatedInstances {
-    pub auth: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub auth: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
