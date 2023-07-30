@@ -6,7 +6,6 @@ use crate::api::structs::*;
 use crate::api::*;
 
 // TODO - federated_instances.rs:
-// Fix issue with external domain links being caught by the Router
 // Improve styling to deal with the small overflow that happens with the tables between shifting from 2 columns to 1 column
 // Potentially move logic from the page to an actual component to maintain seperation of page from components (Optional)
 
@@ -135,7 +134,7 @@ fn Federated(cx: Scope, federated_instances: Vec<Instance>) -> impl IntoView {
       {sorted_instances.into_iter()
         .map(|item| view! { cx,
             <tr>
-            <td><a rel="external" href={format!("{}", item.domain)} target="_blank">{format!("{}", item.domain)}</a></td>
+            <td><a rel="external" href={format!("https://{}", item.domain)} target="_blank">{format!("{}", item.domain)}</a></td>
             <td>{format!("{}", item.software.unwrap_or_default())}</td>
             <td>{format!("{}", item.version.unwrap_or_default())}</td>
             </tr>})
@@ -158,7 +157,7 @@ fn Blocked(cx: Scope, blocked_instances: Vec<Instance>) -> impl IntoView {
       {sorted_instances.into_iter()
         .map(|item| view! { cx,
             <tr>
-            <td><a rel="external" href={format!("{}", item.domain)} target="_blank">{format!("{}", item.domain)}</a></td>
+            <td><a rel="external" href={format!("https://{}", item.domain)} target="_blank">{format!("{}", item.domain)}</a></td>
             <td>{format!("{}", item.software.unwrap_or_default())}</td>
             <td>{format!("{}", item.version.unwrap_or_default())}</td>
             </tr>})
