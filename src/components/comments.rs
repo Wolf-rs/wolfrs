@@ -94,11 +94,11 @@ pub fn Comments(cx: Scope) -> impl IntoView {
 #[component]
 fn CommentsList(cx: Scope, comments: MaybeSignal<Vec<CommentView>>) -> impl IntoView {
     view! { cx,
-      <ul>
+
       {comments.get().into_iter()
         .map(|comment| view! { cx, <CommentItem comment_item=leptos::MaybeSignal::Static(comment) />})
         .collect_view(cx)}
-      </ul>
+
     }
 }
 
@@ -109,7 +109,9 @@ pub fn CommentItem(cx: Scope, comment_item: MaybeSignal<CommentView>) -> impl In
 
     view! { cx,
         <div>
-        {comment.comment.content}
+            {comment.comment.content}
+            <br />
+            "----------"
         </div>
     }
 }

@@ -1,4 +1,3 @@
-use anyhow::{anyhow, Result};
 use leptos::*;
 use leptos_router::*;
 use serde::Deserialize;
@@ -9,8 +8,7 @@ use serde_json::Value;
 use crate::api::posts::get_posts;
 use crate::api::structs::*;
 use crate::api::*;
-use crate::components::*;
-
+use crate::components::pagination::Pagination;
 // TODO - feed.rs:
 // onclick functionality for voting, favoriting, crossposting, and reporting
 // Better handling for mobile layouts, including possibly removing voting buttons on mobile
@@ -89,18 +87,7 @@ pub fn Feed(cx: Scope) -> impl IntoView {
                 }}
                 </Transition>
 
-                // Pagination for the feed
-                <nav aria-label="Feed Page Navigation">
-                    <ul class="pagination justify-content-center">
-                        {move || if page() > 1 {
-                            view! { cx, <li class="page-item"><A class="page-link" href=move || format!("?page={}", page() - 1) >Previous</A></li>}
-                        } else {
-                            view! { cx, <li class="page-item disabled"><A class="page-link" href="" >Previous</A></li>}
-                        }}
-                        <li class="page-item"><A class="page-link" href=move || format!("/")>Page: {page}</A></li>
-                        <li class="page-item"><A class="page-link" href=move || format!("?page={}", page() + 1) >Next</A></li>
-                    </ul>
-                </nav>
+                <Pagination />
             </div>
 
     }
@@ -111,11 +98,11 @@ pub fn Feed(cx: Scope) -> impl IntoView {
 #[component]
 fn PostsList(cx: Scope, posts: MaybeSignal<Vec<PostView>>) -> impl IntoView {
     view! { cx,
-      <ul>
+
       {posts.get().into_iter()
         .map(|post| view! { cx, <PostItem post_view=leptos::MaybeSignal::Static(post) />})
         .collect_view(cx)}
-      </ul>
+
     }
 }
 

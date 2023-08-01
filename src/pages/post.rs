@@ -1,13 +1,15 @@
 use leptos::*;
 use leptos_router::*;
 
+use crate::components::{comments::Comments, post_view::PostView};
+
 // TODO - post.rs:
 // Sidecard component still needs to be built
 // Real styling with Bootstrap
 // Ensure mobile layout works as expected
 
 // The main page for viewing a post and its comments.
-use crate::components::{comments::Comments, post_view::PostView};
+
 #[component]
 pub fn Post(cx: Scope) -> impl IntoView {
     view! { cx,

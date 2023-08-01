@@ -7,7 +7,8 @@ async fn main() {
     use wolfrs::app::*;
     use wolfrs::fileserv::file_and_error_handler;
 
-    simple_logger::init_with_level(log::Level::Debug).expect("couldn't initialize logging");
+    // Controls logging for developer terminal.
+    simple_logger::init_with_level(log::Level::Warn).expect("couldn't initialize logging");
 
     // Setting get_configuration(None) means we'll be using cargo-leptos's env values
     // For deployment these variables are:
@@ -21,7 +22,7 @@ async fn main() {
 
     // build our application with a route
     let app = Router::new()
-        .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
+        .route("/", post(leptos_axum::handle_server_fns))
         .leptos_routes(&leptos_options, routes, |cx| view! { cx, <App/> })
         .fallback(file_and_error_handler)
         .with_state(leptos_options);

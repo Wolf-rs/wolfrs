@@ -76,6 +76,7 @@ where
 
     let json = client.get(path).send().await?.text().await?;
 
+    // Use this to test JSON outputs before unwrapping in case of errors
     //println!("Test in mod.rs: {:#?}", json.clone());
 
     // This really isn't good... It has no error handling, but the way it was handled below kept returning false(?) Err even though the data was there

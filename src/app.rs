@@ -4,6 +4,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::components::{footer::Footer, header::Header, instance::*};
+use crate::pages::communities::Communities;
 use crate::pages::federated_instances::FederatedInstancesList;
 use crate::pages::home::Home;
 use crate::pages::mod_log::ModLog;
@@ -59,7 +60,7 @@ pub fn App(cx: Scope) -> impl IntoView {
             <main>
                 <Routes>
                     <Route path="/" view=|cx| view! { cx, <Home/> }/>
-                    // <Route path="/communities" view=|cx| view! { cx, <Communities/> }/>
+                    <Route path="/communities" view=|cx| view! { cx, <Communities/> }/>
                     // <Route path="/community" view=|cx| view! { cx, <Community/> }/>
                     // <Route path="/create_community" view=|cx| view! { cx, <CreateCommunity/> }/>
                     // <Route path="/create_post" view=|cx| view! { cx, <CreatePost/> }/>
