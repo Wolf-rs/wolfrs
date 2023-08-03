@@ -1,16 +1,20 @@
 use crate::error_template::{AppError, ErrorTemplate};
-use leptos::{html::Header, *};
+use crate::pages::user::User;
+use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
 use crate::components::{footer::Footer, header::Header, instance::*};
+
+// Remove in favour of the boilerplate import below once all pages are ready
 use crate::pages::communities::Communities;
+use crate::pages::community::Community;
 use crate::pages::federated_instances::FederatedInstancesList;
 use crate::pages::home::Home;
 use crate::pages::mod_log::ModLog;
 use crate::pages::post::Post;
 
-// Boilerplate for when the pages are created
+// Boilerplate for when all pages are created
 // use crate::pages::{
 //     communities::Communities, community::Community, create_community::CreateCommunity,
 //     create_post::CreatePost, home::Home, instances::Instances, login::Login, mod_log::ModLog,
@@ -61,7 +65,7 @@ pub fn App(cx: Scope) -> impl IntoView {
                 <Routes>
                     <Route path="/" view=|cx| view! { cx, <Home/> }/>
                     <Route path="/communities" view=|cx| view! { cx, <Communities/> }/>
-                    // <Route path="/community" view=|cx| view! { cx, <Community/> }/>
+                    <Route path="/community/:community_name" view=|cx| view! { cx, <Community/> }/>
                     // <Route path="/create_community" view=|cx| view! { cx, <CreateCommunity/> }/>
                     // <Route path="/create_post" view=|cx| view! { cx, <CreatePost/> }/>
                     <Route path="/federation" view=|cx| view! { cx, <FederatedInstancesList/> }/>
@@ -72,7 +76,7 @@ pub fn App(cx: Scope) -> impl IntoView {
                     // <Route path="/reports" view=|cx| view! { cx, <Reports/> }/>
                     // <Route path="/search" view=|cx| view! { cx, <Search/> }/>
                     // <Route path="/settings" view=|cx| view! { cx, <Settings/> }/>
-                    // <Route path="/user/:username" view=|cx| view! { cx, <User/> }/>
+                    <Route path="/user/:username" view=|cx| view! { cx, <User/> }/>
                 </Routes>
             </main>
             <Footer />

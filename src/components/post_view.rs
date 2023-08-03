@@ -24,7 +24,7 @@ pub fn PostView(cx: Scope) -> impl IntoView {
     let id = move || {
         params
             .with(|params| params.get("id").cloned())
-            .unwrap()
+            .unwrap_or_default()
             .parse::<i32>()
             .unwrap()
     };

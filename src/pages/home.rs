@@ -1,5 +1,6 @@
 use leptos::*;
 
+use crate::api::structs::router_endpoints;
 use crate::components::feed::Feed;
 
 /// Renders the home page of the Lemmy instance, which is the feed and sidebar screen.
@@ -11,7 +12,7 @@ pub fn Home(cx: Scope) -> impl IntoView {
                 <div class="row gx-4">
                     // Feed Column
                     <div  class="col-md-9">
-                        <Feed />
+                        <Feed endpoint=router_endpoints::RouterEndpoint::HOME />
                     </div>
 
                     // Sidecard Column

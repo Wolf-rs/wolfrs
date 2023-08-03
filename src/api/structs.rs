@@ -112,6 +112,16 @@ pub mod api_endpoints {
     }
 }
 
+pub mod router_endpoints {
+    pub struct RouterEndpoint(pub String);
+
+    impl RouterEndpoint {
+        pub const COMMUNITY: &str = "community";
+        pub const HOME: &str = "home";
+        pub const USER: &str = "user";
+    }
+}
+
 // The struct for the url constructor
 #[derive(Serialize, Clone, Default)]
 pub struct ApiUrlConstructor {

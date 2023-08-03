@@ -1,14 +1,12 @@
 use leptos::*;
 use leptos_router::*;
-use serde::Deserialize;
-use serde::Serialize;
-use serde_json::json;
-use serde_json::Value;
 
 use crate::api::posts::get_posts;
 use crate::api::structs::*;
+use crate::api::user::get_person_details;
 use crate::api::*;
 use crate::components::pagination::Pagination;
+
 // TODO - feed.rs:
 // onclick functionality for voting, favoriting, crossposting, and reporting
 // Better handling for mobile layouts, including possibly removing voting buttons on mobile
@@ -17,9 +15,9 @@ use crate::components::pagination::Pagination;
 // Implement URL preview images for external links (This seems to already be handled by the backend?)
 // Finish fleshing out PostItem for stuff like language, edited status, date, etc
 
-// The home page feed column that shows the Posts list
+// The feed column that shows the Posts list, used for Home, Community, and User pages
 #[component]
-pub fn Feed(cx: Scope) -> impl IntoView {
+pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
     let query = use_query_map(cx);
     let page = move || {
         query
@@ -27,32 +25,93 @@ pub fn Feed(cx: Scope) -> impl IntoView {
             .unwrap_or(1)
     };
 
-    // Variable that holds the returned GetPostsResponse from the API
+    let params = use_params_map(cx);
+    let community_name = move || {
+        params
+            .with(|params| params.get("community_name").cloned())
+            .unwrap_or_default()
+            .parse::<String>()
+            .unwrap()
+    };
+
+    let username = move || {
+        params
+            .with(|params| params.get("username").cloned())
+            .unwrap_or_default()
+            .parse::<String>()
+            .unwrap()
+    };
+
+    // Variable that holds the returned PostView from the API for either GetPostsResponse or GetPersonDetailsResponse
     let posts = create_resource(cx, page, move |page| async move {
-        // This constructs the proper API URL for GetPosts
-        let url_constructor = ApiUrlConstructor {
-            endpoint: api_endpoints::GetEndpoint::GET_POSTS.to_string(),
-            id: None,
-            params: None,
+        // This constructs the proper API URL for GetPosts or GetPersonDetails
+        let url_constructor = match endpoint {
+            "community" | "home" => ApiUrlConstructor {
+                endpoint: api_endpoints::GetEndpoint::GET_POSTS.to_string(),
+                id: None,
+                params: None,
+            },
+            "user" => ApiUrlConstructor {
+                endpoint: api_endpoints::GetEndpoint::GET_PERSON_DETAILS.to_string(),
+                id: None,
+                params: None,
+            },
+            &_ => unreachable!(),
         };
 
-        // This assembles the GetPosts request form
-        let get_form = GetPosts {
+        if endpoint.ne("user") {
+            // This assembles the GetPosts request form for either the home feed or community feed
+            let get_form = match endpoint {
+                "community" => GetPosts {
+                    auth: None,
+                    community_id: None,
+                    community_name: Some(community_name()),
+                    limit: Some(20),
+                    page: Some(page),
+                    post_id: None,
+                    saved_only: None,
+                    sort: None,
+                    type_: None,
+                },
+                "home" => GetPosts {
+                    auth: None,
+                    community_id: None,
+                    community_name: None,
+                    limit: Some(20),
+                    page: Some(page),
+                    post_id: None,
+                    saved_only: None,
+                    sort: Some(SortType::Active),
+                    type_: Some(ListingType::All),
+                },
+                &_ => unreachable!(),
+            };
+            // This is where the API is called for GetPosts and the GetPostsResponse is returned and converted to PostView
+            return get_posts(cx, &api_url_builder(cx, url_constructor, get_form))
+                .await
+                .unwrap()
+                .posts
+                .into();
+        }
+
+        // This assembles the GetPersonDetails request form for the user feed
+        let get_form = GetPersonDetails {
             auth: None,
             community_id: None,
-            community_name: None,
             limit: Some(20),
             page: Some(page),
-            post_id: None,
+            person_id: None,
             saved_only: None,
             sort: None,
-            type_: None,
+            username: Some(username()),
         };
 
-        // This is where the API is called for GetPosts and the GetPostsResponse is returned
-        get_posts(cx, &api_url_builder(cx, url_constructor, get_form))
+        // This is where the API is called for GetPersonDetails and the GetPersonDetailsResponse is returned and converted to PostView
+        get_person_details(cx, &api_url_builder(cx, url_constructor, get_form))
             .await
-            .ok()
+            .unwrap()
+            .posts
+            .into()
     });
 
     let err_msg = "Error loading this post: ";
@@ -79,7 +138,7 @@ pub fn Feed(cx: Scope) -> impl IntoView {
                             Some(res) => {
                                 view! { cx,
                                     <div>
-                                        <PostsList posts=res.posts.into()/>
+                                        <PostsList posts=res.into()/>
                                     </div>
                                 }
                             }
@@ -94,7 +153,7 @@ pub fn Feed(cx: Scope) -> impl IntoView {
 }
 
 // The Posts list containing the Post items
-// Suggestion: Implement collapsing accordions for multiple posts in a row from the same community?
+// Suggestion: Implement collapsing accordions for multiple posts in a row from the same community in the home feed?
 #[component]
 fn PostsList(cx: Scope, posts: MaybeSignal<Vec<PostView>>) -> impl IntoView {
     view! { cx,
@@ -111,8 +170,9 @@ fn PostsList(cx: Scope, posts: MaybeSignal<Vec<PostView>>) -> impl IntoView {
 pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
     // These set the varaibles from the PostView struct to make insetion into the view easier
     let post = post_view.get();
-    let post_link = format!("post/{}", post.post.id);
-    let total_votes = post.counts.upvotes - post.counts.downvotes;
+    let post_link = format!("/post/{}", post.post.id);
+    // Currently not used, may be used later on
+    //let total_votes = post.counts.upvotes - post.counts.downvotes;
     // Checks to see if a post thumbnail exists, if it does not it setts it to a default image
     let post_thumbnail = match post.post.thumbnail_url {
         Some(_) => post.post.thumbnail_url,
@@ -125,14 +185,48 @@ pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
         Some(_) => post.creator.avatar,
         _ => Option::Some("/static/default_assets/default-profile.png".to_string()),
     };
-    let creator_name = post.creator.name;
-    // This needs a similar check as above, I still need to make a default placeholder for a community avatar
-    let community_avatar = post.community.icon;
-    // This needs to be handled better, it thinks that some local communities are external, possibly due to cross-posting
-    let community_name = if post.post.local {
-        post.community.name
+    let creator_name = post.creator.name.clone();
+    let creator_link = if post.creator.local {
+        format!("/user/{}", post.creator.name)
     } else {
-        format!("{}@{}", post.community.name, post.community.title)
+        let url_regex = regex::Regex::new(r"https:\/\/(.*)\/u\/(.*)").unwrap();
+        let Some(external_creator_link) = url_regex.captures(&post.creator.actor_id) else {
+            unreachable!();
+        };
+        format!("/user/{}@{}", post.creator.name, &external_creator_link[1])
+    };
+    // This needs a similar check as above, I still need to make a default placeholder for a community avatar
+    let community_avatar = match post.community.icon {
+        Some(_) => post.community.icon,
+        _ => Option::Some("/static/default_assets/default-community.png".to_string()),
+    };
+    // This needs to be handled better, it thinks that some local communities are external, possibly due to cross-posting?
+    let community_name = if post.community.local {
+        post.community.name.clone()
+    } else {
+        let url_regex = regex::Regex::new(r"https:\/\/(.*)\/c\/(.*)").unwrap();
+
+        let Some(external_community_link) = url_regex.captures(&post.community.actor_id) else {
+            unreachable!();
+        };
+        format!(
+            "{}@{}",
+            post.community.name.clone(),
+            &external_community_link[1]
+        )
+    };
+    let community_link = if post.community.local {
+        format!("/community/{}", post.community.name)
+    } else {
+        let url_regex = regex::Regex::new(r"https:\/\/(.*)\/c\/(.*)").unwrap();
+
+        let Some(external_community_link) = url_regex.captures(&post.community.actor_id) else {
+            unreachable!();
+        };
+        format!(
+            "/community/{}@{}",
+            post.community.name, &external_community_link[1]
+        )
     };
     let comment_count = post.counts.comments;
 
@@ -175,12 +269,9 @@ pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                         </h5>
                     </div>
                     <div class="row">
-                        <div class="col-sm-1">
-                            <img src={creator_avatar} alt="mdo" width="32" height="32" class="rounded" />
-                        </div>
-                        <div class="col-sm-11">
+                        <div class="col-sm-12">
                             <p>
-                                {creator_name}" in "{community_name}
+                                <A href={creator_link} ><img src={creator_avatar} alt="mdo" width="32" height="32" class="rounded" />"  "{creator_name}</A> " in "<A href={community_link}><img src={community_avatar} alt="mdo" width="32" height="32" class="rounded" />"  "{community_name}</A>
                             </p>
                         </div>
                     </div>
@@ -200,7 +291,6 @@ pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                 </div>
             </div>
         </div>
-
         <hr />
       </div>
     }
