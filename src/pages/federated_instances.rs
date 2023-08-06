@@ -46,27 +46,34 @@ pub fn FederatedInstancesList(cx: Scope) -> impl IntoView {
                 // Handles the loading screen while waiting for a reply from the API
                 view! { cx,
                     <div class="d-flex align-items-center">
-                        <h1>Loading...</h1>
+                        <h1>
+                            Loading...
+                        </h1>
                         <div class="spinner-grow ms-auto" role="status" aria-hidden="true"></div>
                     </div>
                 }
             }>
-            {move || {
-                instances
-                    .read(cx)
-                    .map(|res| match res {
-                        None => {
-                            view! { cx, <div>{format!("{err_msg}")}</div> }
-                        }
-                        Some(res) => {
-                            view! { cx,
-                                <div class="row">
-                                    <FederatedInstancesTables instances=res.federated_instances.unwrap().into() />
-                                </div>
+                {move || {
+                    instances
+                        .read(cx)
+                        .map(|res| match res {
+                            None => {
+                                view! { cx, <div>{format!("{err_msg}")}</div> }
                             }
-                        }
-                    })
-            }}
+                            Some(res) => {
+
+                                view! { cx,
+                                    <div class="row">
+                                        <FederatedInstancesTables instances=res
+                                            .federated_instances
+                                            .unwrap()
+                                            .into()/>
+                                    </div>
+                                }
+                            }
+                        })
+                }}
+
             </Transition>
         </div>
     }
@@ -84,7 +91,9 @@ fn FederatedInstancesTables(
                 <table class="table table-dark table-striped">
                     <thead>
                         <tr>
-                            <th colspan="3"><h3>"Federated Instances"</h3></th>
+                            <th colspan="3">
+                                <h3>"Federated Instances"</h3>
+                            </th>
                         </tr>
                         <tr>
                             <th scope="col">"Domain Name"</th>
@@ -94,10 +103,11 @@ fn FederatedInstancesTables(
                     </thead>
                     // Check to see if the instance is using an allowed list or just has linked instances, as these should be mutually exclusive
                     {if instances.get().allowed.is_empty() {
-                        view! { cx, <Federated federated_instances=instances.get().linked /> }
+                        view! { cx, <Federated federated_instances=instances.get().linked/> }
                     } else {
-                        view! { cx, <Federated federated_instances=instances.get().allowed /> }
+                        view! { cx, <Federated federated_instances=instances.get().allowed/> }
                     }}
+
                 </table>
             </div>
         </div>
@@ -114,7 +124,7 @@ fn FederatedInstancesTables(
                             <th scope="col">"Version"</th>
                         </tr>
                     </thead>
-                    <Blocked blocked_instances=instances.get().blocked />
+                    <Blocked blocked_instances=instances.get().blocked/>
                 </table>
             </div>
         </div>
@@ -129,18 +139,28 @@ fn Federated(cx: Scope, federated_instances: Vec<Instance>) -> impl IntoView {
     sorted_instances.sort_by(|a, b| a.domain.cmp(&b.domain));
 
     view! { cx,
-
-      <tbody>
-      {sorted_instances.into_iter()
-        .map(|item| view! { cx,
-            <tr>
-            <td><a rel="external" href={format!("https://{}", item.domain)} target="_blank">{format!("{}", item.domain)}</a></td>
-            <td>{format!("{}", item.software.unwrap_or_default())}</td>
-            <td>{format!("{}", item.version.unwrap_or_default())}</td>
-            </tr>})
-        .collect_view(cx)}
-      </tbody>
-
+        <tbody>
+            {sorted_instances
+                .into_iter()
+                .map(|item| {
+                    view! { cx,
+                        <tr>
+                            <td>
+                                <a
+                                    rel="external"
+                                    href=format!("https://{}", item.domain)
+                                    target="_blank"
+                                >
+                                    {format!("{}", item.domain)}
+                                </a>
+                            </td>
+                            <td>{format!("{}", item.software.unwrap_or_default())}</td>
+                            <td>{format!("{}", item.version.unwrap_or_default())}</td>
+                        </tr>
+                    }
+                })
+                .collect_view(cx)}
+        </tbody>
     }
 }
 
@@ -152,17 +172,27 @@ fn Blocked(cx: Scope, blocked_instances: Vec<Instance>) -> impl IntoView {
     sorted_instances.sort_by(|a, b| a.domain.cmp(&b.domain));
 
     view! { cx,
-
-      <tbody>
-      {sorted_instances.into_iter()
-        .map(|item| view! { cx,
-            <tr>
-            <td><a rel="external" href={format!("https://{}", item.domain)} target="_blank">{format!("{}", item.domain)}</a></td>
-            <td>{format!("{}", item.software.unwrap_or_default())}</td>
-            <td>{format!("{}", item.version.unwrap_or_default())}</td>
-            </tr>})
-        .collect_view(cx)}
-      </tbody>
-
+        <tbody>
+            {sorted_instances
+                .into_iter()
+                .map(|item| {
+                    view! { cx,
+                        <tr>
+                            <td>
+                                <a
+                                    rel="external"
+                                    href=format!("https://{}", item.domain)
+                                    target="_blank"
+                                >
+                                    {format!("{}", item.domain)}
+                                </a>
+                            </td>
+                            <td>{format!("{}", item.software.unwrap_or_default())}</td>
+                            <td>{format!("{}", item.version.unwrap_or_default())}</td>
+                        </tr>
+                    }
+                })
+                .collect_view(cx)}
+        </tbody>
     }
 }

@@ -88,32 +88,38 @@ pub fn Comments(cx: Scope, post_info: PostView) -> impl IntoView {
 
     view! { cx,
         <div>
-        <Transition fallback=move || {
-            // Handles the loading screen while waiting for a reply from the API
-            view! { cx,
-                <div class="d-flex align-items-center">
-                    <h1>Loading...</h1>
-                    <div class="spinner-grow ms-auto" role="status" aria-hidden="true"></div>
-                </div>
-             }
-        }>
-            {move || {
-                comments
-                    .read(cx)
-                    .map(|res| match res {
-                        None => {
-                            view! { cx, <div>{format!("{err_msg}{:?}", comments.read(cx))}</div> }
-                        }
-                        Some(res) => {
-                            view! { cx,
-                                <div>
-                                    <CommentsList comments=res.comments.into()/>
-                                </div>
+            <Transition fallback=move || {
+                // Handles the loading screen while waiting for a reply from the API
+                view! { cx,
+                    <div class="d-flex align-items-center">
+                        <h1>
+                            Loading...
+                        </h1>
+                        <div class="spinner-grow ms-auto" role="status" aria-hidden="true"></div>
+                    </div>
+                }
+            }>
+                {move || {
+                    comments
+                        .read(cx)
+                        .map(|res| match res {
+                            None => {
+                                view! { cx,
+                                    <div>{format!("{err_msg}{:?}", comments.read(cx))}</div>
+                                }
                             }
-                        }
-                    })
-            }}
-        </Transition>
+                            Some(res) => {
+
+                                view! { cx,
+                                    <div>
+                                        <CommentsList comments=res.comments.into()/>
+                                    </div>
+                                }
+                            }
+                        })
+                }}
+
+            </Transition>
         </div>
     }
 }
@@ -123,11 +129,13 @@ pub fn Comments(cx: Scope, post_info: PostView) -> impl IntoView {
 #[component]
 fn CommentsList(cx: Scope, comments: MaybeSignal<Vec<CommentView>>) -> impl IntoView {
     view! { cx,
-
-      {comments.get().into_iter()
-        .map(|comment| view! { cx, <CommentItem comment_item=leptos::MaybeSignal::Static(comment) />})
-        .collect_view(cx)}
-
+        {comments
+            .get()
+            .into_iter()
+            .map(|comment| {
+                view! { cx, <CommentItem comment_item=leptos::MaybeSignal::Static(comment)/> }
+            })
+            .collect_view(cx)}
     }
 }
 
@@ -139,12 +147,8 @@ pub fn CommentItem(cx: Scope, comment_item: MaybeSignal<CommentView>) -> impl In
     view! { cx,
         <div>
             <div class="card">
-                <div class="card-header">
-                    {comment.creator.name}
-                </div>
-                <div class="card-body">
-                    {comment.comment.content}
-                </div>
+                <div class="card-header">{comment.creator.name}</div>
+                <div class="card-body">{comment.comment.content}</div>
             </div>
         </div>
     }

@@ -48,38 +48,42 @@ pub fn Communities(cx: Scope) -> impl IntoView {
 
     let err_msg = "Error loading this post: ";
 
-    view!(cx,
+    view! { cx,
         <div class="container overflow-hidden">
             <Transition fallback=move || {
                 // Handles the loading screen while waiting for a reply from the API
                 view! { cx,
                     <div class="d-flex align-items-center">
-                        <h1>Loading...</h1>
+                        <h1>
+                            Loading...
+                        </h1>
                         <div class="spinner-grow ms-auto" role="status" aria-hidden="true"></div>
                     </div>
                 }
             }>
-            {move || {
-                communities
-                    .read(cx)
-                    .map(|res| match res {
-                        None => {
-                            view! { cx, <div>{format!("{err_msg}")}</div> }
-                        }
-                        Some(res) => {
-                            view! { cx,
-                                <div class="row">
-                                    <CommunitiesList communities=res.communities />
-                                </div>
+                {move || {
+                    communities
+                        .read(cx)
+                        .map(|res| match res {
+                            None => {
+                                view! { cx, <div>{format!("{err_msg}")}</div> }
                             }
-                        }
-                    })
-            }}
+                            Some(res) => {
+
+                                view! { cx,
+                                    <div class="row">
+                                        <CommunitiesList communities=res.communities/>
+                                    </div>
+                                }
+                            }
+                        })
+                }}
+
             </Transition>
 
-            <Pagination />
+            <Pagination/>
         </div>
-    )
+    }
 }
 
 #[component]
@@ -90,7 +94,9 @@ pub fn CommunitiesList(cx: Scope, communities: Vec<CommunityView>) -> impl IntoV
                 <table class="table table-dark table-striped">
                     <thead>
                         <tr>
-                            <th colspan="3"><h3>"Communites List"</h3></th>
+                            <th colspan="3">
+                                <h3>"Communites List"</h3>
+                            </th>
                         </tr>
                         <tr>
                             <th scope="col">"Name"</th>
@@ -101,7 +107,7 @@ pub fn CommunitiesList(cx: Scope, communities: Vec<CommunityView>) -> impl IntoV
                             <th scope="col">"Subscription"</th>
                         </tr>
                     </thead>
-                    <CommunitiesListItem communities=communities />
+                    <CommunitiesListItem communities=communities/>
                 </table>
             </div>
         </div>
@@ -111,21 +117,27 @@ pub fn CommunitiesList(cx: Scope, communities: Vec<CommunityView>) -> impl IntoV
 #[component]
 pub fn CommunitiesListItem(cx: Scope, communities: Vec<CommunityView>) -> impl IntoView {
     view! { cx,
-
-      <tbody>
-      {communities.into_iter()
-        .map(|item| view! { cx,
-            <tr>
-            <td><a href={format!("{}", item.community.actor_id)}>{format!("{}", item.community.title)}</a></td>
-            <td>{format!("{}", item.counts.subscribers)}</td>
-            <td>{format!("{}", item.counts.users_active_month)}</td>
-            <td>{format!("{}", item.counts.posts)}</td>
-            <td>{format!("{}", item.counts.comments)}</td>
-            // Needs to be dynamic and allow for subscribing from here?
-            <td>{format!("{:?}", item.subscribed)}</td>
-            </tr>})
-        .collect_view(cx)}
-      </tbody>
-
+        <tbody>
+            {communities
+                .into_iter()
+                .map(|item| {
+                    view! { cx,
+                        <tr>
+                            <td>
+                                <a href=format!(
+                                    "{}", item.community.actor_id
+                                )>{format!("{}", item.community.title)}</a>
+                            </td>
+                            <td>{format!("{}", item.counts.subscribers)}</td>
+                            <td>{format!("{}", item.counts.users_active_month)}</td>
+                            <td>{format!("{}", item.counts.posts)}</td>
+                            <td>{format!("{}", item.counts.comments)}</td>
+                            // Needs to be dynamic and allow for subscribing from here?
+                            <td>{format!("{:?}", item.subscribed)}</td>
+                        </tr>
+                    }
+                })
+                .collect_view(cx)}
+        </tbody>
     }
 }

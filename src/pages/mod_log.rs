@@ -57,39 +57,68 @@ pub fn ModLog(cx: Scope) -> impl IntoView {
                 // Handles the loading screen while waiting for a reply from the API
                 view! { cx,
                     <div class="d-flex align-items-center">
-                        <h1>Loading...</h1>
+                        <h1>
+                            Loading...
+                        </h1>
                         <div class="spinner-grow ms-auto" role="status" aria-hidden="true"></div>
                     </div>
                 }
             }>
-            {move || {
-                modlog
-                    .read(cx)
-                    .map(|res| match res {
-                        None => {
-                            view! { cx, <div>{format!("{err_msg}")}</div> }
-                        }
-                        Some(res) => {
-                            view! { cx,
-                                <div>
-                                    <ModLogList items=res.into() />
-                                </div>
+                {move || {
+                    modlog
+                        .read(cx)
+                        .map(|res| match res {
+                            None => {
+                                view! { cx, <div>{format!("{err_msg}")}</div> }
                             }
-                        }
-                    })
-            }}
+                            Some(res) => {
+
+                                view! { cx,
+                                    <div>
+                                        <ModLogList items=res.into()/>
+                                    </div>
+                                }
+                            }
+                        })
+                }}
+
             </Transition>
 
             // Pagination for the mod log
             <nav aria-label="Feed Page Navigation">
                 <ul class="pagination justify-content-center">
-                    {move || if page() > 1 {
-                        view! { cx, <li class="page-item"><A class="page-link" href=move || format!("?page={}", page() - 1) >Previous</A></li>}
-                    } else {
-                        view! { cx, <li class="page-item disabled"><A class="page-link" href="" >Previous</A></li>}
+                    {move || {
+                        if page() > 1 {
+                            view! { cx,
+                                <li class="page-item">
+                                    <A
+                                        class="page-link"
+                                        href=move || format!("?page={}", page() - 1)
+                                    >
+                                        Previous
+                                    </A>
+                                </li>
+                            }
+                        } else {
+                            view! { cx,
+                                <li class="page-item disabled">
+                                    <A class="page-link" href="">
+                                        Previous
+                                    </A>
+                                </li>
+                            }
+                        }
                     }}
-                    <li class="page-item"><A class="page-link" href=move || format!("/")>Page: {page}</A></li>
-                    <li class="page-item"><A class="page-link" href=move || format!("?page={}", page() + 1) >Next</A></li>
+                    <li class="page-item">
+                        <A class="page-link" href=move || format!("/")>
+                            Page:
+                            {page}
+                        </A>
+                    </li> <li class="page-item">
+                        <A class="page-link" href=move || format!("?page={}", page() + 1)>
+                            Next
+                        </A>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -102,9 +131,9 @@ fn ModLogList(cx: Scope, items: MaybeSignal<GetModlogResponse>) -> impl IntoView
     let sorted_modlog = mod_log_sorter(items.get());
 
     view! { cx,
-      <ul>
-        <ModLogItem items=sorted_modlog />
-      </ul>
+        <ul>
+            <ModLogItem items=sorted_modlog/>
+        </ul>
     }
 }
 
@@ -112,11 +141,10 @@ fn ModLogList(cx: Scope, items: MaybeSignal<GetModlogResponse>) -> impl IntoView
 #[component]
 fn ModLogItem(cx: Scope, items: Vec<String>) -> impl IntoView {
     view! { cx,
-
-      {items.into_iter()
-        .map(|item| view! { cx, <li>{format!("{:?}", item)}</li>})
-        .collect_view(cx)}
-
+        {items
+            .into_iter()
+            .map(|item| view! { cx, <li>{format!("{:?}", item)}</li> })
+            .collect_view(cx)}
     }
 }
 

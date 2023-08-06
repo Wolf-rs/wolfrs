@@ -22,15 +22,47 @@ pub fn Footer(cx: Scope) -> impl IntoView {
                 <p class="col-md-4 mb-0 text-body-secondary">{format!("{}: {}", name, slogan)}</p>
 
                 <a class="navbar-brand" href="#">
-                    <img src={format!("/assets/{}", logo_source)} alt="Logo" width={format!("{}", width)} height={format!("{}", height)} class="d-inline-block align-text-top" />
+                    <img
+                        src=format!("/assets/{}", logo_source)
+                        alt="Logo"
+                        width=format!("{}", width)
+                        height=format!("{}", height)
+                        class="d-inline-block align-text-top"
+                    />
                 </a>
 
                 <ul class="nav col-md-5 justify-content-end">
-                    <li class="nav-item"><a href="/mod_log" class="nav-link px-2 text-body-secondary">{"Modlog"}</a></li>
-                    <li class="nav-item"><a href="/federation" class="nav-link px-2 text-body-secondary">{"Federation"}</a></li>
-                    <li class="nav-item"><a href={documentation_url.to_string()} class="nav-link px-2 text-body-secondary">{"Documentation"}</a></li>
-                    <li class="nav-item"><a href={source_code_url.to_string()} class="nav-link px-2 text-body-secondary">{"Source Code"}</a></li>
-                    <li class="nav-item"><a href="https://join-lemmy.org/" class="nav-link px-2 text-body-secondary">{"Lemmy Info"}</a></li>
+                    <li class="nav-item">
+                        <a href="/mod_log" class="nav-link px-2 text-body-secondary">
+                            {"Modlog"}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/federation" class="nav-link px-2 text-body-secondary">
+                            {"Federation"}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a
+                            href=documentation_url.to_string()
+                            class="nav-link px-2 text-body-secondary"
+                        >
+                            {"Documentation"}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a
+                            href=source_code_url.to_string()
+                            class="nav-link px-2 text-body-secondary"
+                        >
+                            {"Source Code"}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="https://join-lemmy.org/" class="nav-link px-2 text-body-secondary">
+                            {"Lemmy Info"}
+                        </a>
+                    </li>
                 </ul>
             </footer>
         </div>

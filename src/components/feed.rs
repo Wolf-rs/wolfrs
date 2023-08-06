@@ -131,55 +131,89 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
     let err_msg = "Error loading this post: ";
 
     view! { cx,
-                <div class="card text-left">
-                    <div class="card-header">
-                        <ul class="nav nav-tabs card-header-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link" class:disabled=move || subscribed_disabled aria-disabled=subscribed_disabled href="#">"Subscribed"</a>
-                        </li>
-                        <li class="nav-item" on:click=move |_| {set_local_active.update(|value| *value = true); set_subscribed_active.update(|value| *value = false); set_all_active.update(|value| *value = false); set_active_tab.update(|value| *value = ListingType::Local)}>
-                            <a class="nav-link" class:active=move || local_active.get() href="#">"Local"</a>
-                        </li>
-                        <li class="nav-item" on:click=move |_| {set_all_active.update(|value| *value = true); set_local_active.update(|value| *value = false); set_subscribed_active.update(|value| *value = false); set_active_tab.update(|value| *value = ListingType::All)}>
-                            <a class="nav-link" class:active=move || all_active.get() href="#">"All"</a>
-                        </li>
-                        </ul>
-                    </div>
-                    <div class="card-body">
-                    <div class="container overflow-hidden">
-                <Transition fallback=move || {
-                    // Handles the loading screen while waiting for a reply from the API
-                    view! { cx,
-                        <div class="d-flex align-items-center">
-                            <h1>Loading...</h1>
-                            <div class="spinner-grow ms-auto" role="status" aria-hidden="true"></div>
-                        </div>
-                     }
-                }>
-                    {move || {
-                        posts
-                            .read(cx)
-                            .map(|res| match res {
-                                None => {
-                                    view! { cx, <div>{format!("{err_msg}")}</div> }
-                                }
-                                Some(res) => {
-                                    view! { cx,
-                                        <div>
-                                            <FeedList posts=res.into()/>
-                                        </div>
+        <div class="card text-left">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs">
+                    <li class="nav-item">
+                        <a
+                            class="nav-link"
+                            class:disabled=move || subscribed_disabled
+                            aria-disabled=subscribed_disabled
+                            href="#"
+                        >
+                            "Subscribed"
+                        </a>
+                    </li>
+                    <li
+                        class="nav-item"
+                        on:click=move |_| {
+                            set_local_active.update(|value| *value = true);
+                            set_subscribed_active.update(|value| *value = false);
+                            set_all_active.update(|value| *value = false);
+                            set_active_tab.update(|value| *value = ListingType::Local)
+                        }
+                    >
+                        <a class="nav-link" class:active=move || local_active.get() href="#">
+                            "Local"
+                        </a>
+                    </li>
+                    <li
+                        class="nav-item"
+                        on:click=move |_| {
+                            set_all_active.update(|value| *value = true);
+                            set_local_active.update(|value| *value = false);
+                            set_subscribed_active.update(|value| *value = false);
+                            set_active_tab.update(|value| *value = ListingType::All)
+                        }
+                    >
+                        <a class="nav-link" class:active=move || all_active.get() href="#">
+                            "All"
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="container overflow-hidden">
+                    <Transition fallback=move || {
+                        // Handles the loading screen while waiting for a reply from the API
+                        view! { cx,
+                            <div class="d-flex align-items-center">
+                                <h1>
+                                    Loading...
+                                </h1>
+                                <div
+                                    class="spinner-grow ms-auto"
+                                    role="status"
+                                    aria-hidden="true"
+                                ></div>
+                            </div>
+                        }
+                    }>
+                        {move || {
+                            posts
+                                .read(cx)
+                                .map(|res| match res {
+                                    None => {
+                                        view! { cx, <div>{format!("{err_msg}")}</div> }
                                     }
-                                }
-                            })
-                    }}
-                    </Transition>
-                    </div>
+                                    Some(res) => {
 
+                                        view! { cx,
+                                            <div>
+                                                <FeedList posts=res.into()/>
+                                            </div>
+                                        }
+                                    }
+                                })
+                        }}
+
+                    </Transition>
                 </div>
 
-                <Pagination />
             </div>
 
+            <Pagination/>
+        </div>
     }
 }
 
@@ -188,11 +222,11 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
 #[component]
 fn FeedList(cx: Scope, posts: MaybeSignal<Vec<PostView>>) -> impl IntoView {
     view! { cx,
-
-      {posts.get().into_iter()
-        .map(|post| view! { cx, <FeedItem post_view=leptos::MaybeSignal::Static(post) />})
-        .collect_view(cx)}
-
+        {posts
+            .get()
+            .into_iter()
+            .map(|post| view! { cx, <FeedItem post_view=leptos::MaybeSignal::Static(post)/> })
+            .collect_view(cx)}
     }
 }
 
@@ -283,67 +317,107 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
     let comment_count = post.counts.comments;
 
     view! { cx,
-      <div class="row">
+        <div class="row">
 
-        // Voting Column
-        <div class="col-sm-1">
-            <div class="row">
-                <i class="bi bi-caret-up text-center"></i>
-            </div>
-            <div class="row">
-            <div class="text-center text-nowrap">
-            {post.counts.upvotes - post.counts.downvotes}
-            </div>
-            </div>
-            <div class="row">
-            <i class="bi bi-caret-down text-center"></i>
-            </div>
-        </div>
-
-        <div class="col-sm-11">
-            <div class="row">
-                <div class="col-sm-2">
-                    <div style="">
-                        <img src={post_thumbnail} width="75" height="75" class="rounded" alt="..." style="" />
+            // Voting Column
+            <div class="col-sm-1">
+                <div class="row">
+                    <i class="bi bi-caret-up text-center"></i>
+                </div>
+                <div class="row">
+                    <div class="text-center text-nowrap">
+                        {post.counts.upvotes - post.counts.downvotes}
                     </div>
                 </div>
-                <div class="col-sm-10">
-                    <div class="row">
-                        <h5>
-                        <A href={post_link.clone()} class="link-offset-2 link-underline link-underline-opacity-0">
-                        {post_title}
-                        </A>
-                        {if post_pin {
-                            view! { cx, <i class="bi bi-pin-angle-fill"></i>}
-                        } else {
-                            view! { cx, <i></i>}
-                        }}
-                        </h5>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <p>
-                                <A href={creator_link} ><img src={creator_avatar} alt="mdo" width="32" height="32" class="rounded" />"  "{creator_name}</A> " in "<A href={community_link}><img src={community_avatar} alt="mdo" width="32" height="32" class="rounded" />"  "{community_name}</A>
-                            </p>
+                <div class="row">
+                    <i class="bi bi-caret-down text-center"></i>
+                </div>
+            </div>
+
+            <div class="col-sm-11">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div style="">
+                            <img
+                                src=post_thumbnail
+                                width="75"
+                                height="75"
+                                class="rounded"
+                                alt="..."
+                                style=""
+                            />
                         </div>
                     </div>
-                    <div class="row">
-                        <span>
-                            <A href={post_link} class="link-secondary link-offset-2 link-underline link-underline-opacity-0"><i class="bi bi-chat-right-text"></i>" "{comment_count}" Comments"</A>
-                            "   "
-                            <i class="bi bi-bookmark-star text-secondary"></i>
-                            "   "
-                            <i class="bi bi-signpost-split text-secondary"></i>
-                            "   "
-                            <i class="bi bi-flag text-secondary"></i>
-                        </span>
+                    <div class="col-sm-10">
+                        <div class="row">
+                            <h5>
+                                <A
+                                    href=post_link.clone()
+                                    class="link-offset-2 link-underline link-underline-opacity-0"
+                                >
+                                    {post_title}
+                                </A>
+                                {if post_pin {
+                                    view! { cx, <i class="bi bi-pin-angle-fill"></i> }
+                                } else {
+                                    view! { cx, <i></i> }
+                                }}
 
+                            </h5>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <p>
+                                    <A href=creator_link>
+                                        <img
+                                            src=creator_avatar
+                                            alt="mdo"
+                                            width="32"
+                                            height="32"
+                                            class="rounded"
+                                        />
+                                        "  "
+                                        {creator_name}
+                                    </A>
+                                    " in "
+                                    <A href=community_link>
+                                        <img
+                                            src=community_avatar
+                                            alt="mdo"
+                                            width="32"
+                                            height="32"
+                                            class="rounded"
+                                        />
+                                        "  "
+                                        {community_name}
+                                    </A>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <span>
+                                <A
+                                    href=post_link
+                                    class="link-secondary link-offset-2 link-underline link-underline-opacity-0"
+                                >
+                                    <i class="bi bi-chat-right-text"></i>
+                                    " "
+                                    {comment_count}
+                                    " Comments"
+                                </A>
+                                "   "
+                                <i class="bi bi-bookmark-star text-secondary"></i>
+                                "   "
+                                <i class="bi bi-signpost-split text-secondary"></i>
+                                "   "
+                                <i class="bi bi-flag text-secondary"></i>
+                            </span>
 
+                        </div>
                     </div>
                 </div>
             </div>
+            <hr/>
         </div>
-        <hr />
-      </div>
     }
 }
