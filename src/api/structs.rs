@@ -2503,7 +2503,7 @@ pub struct LanguageId {
     pub LanguageId: i32,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone, Copy)]
 pub enum ListingType {
     All,
     Local,

@@ -6,6 +6,7 @@ use crate::api::structs::*;
 use crate::api::*;
 
 // TODO - comments.rs:
+// Add functionality for pulling in replies (IDK how to do this...)
 // onclick functionality for voting, favoriting, crossposting, and reporting
 // Better handling for mobile layouts
 // Build media popups for images(?)
@@ -15,7 +16,7 @@ use crate::api::*;
 
 // The component box for the comments on a post
 #[component]
-pub fn Comments(cx: Scope) -> impl IntoView {
+pub fn Comments(cx: Scope, post_info: PostView) -> impl IntoView {
     let params = use_params_map(cx);
     let id = move || {
         params
@@ -25,40 +26,68 @@ pub fn Comments(cx: Scope) -> impl IntoView {
             .unwrap()
     };
 
+    let local_or_external = match !post_info.community.local {
+        true => {
+            let url_regex = regex::Regex::new(r"https://(.*)/c/(.*)").unwrap();
+
+            let external_community_link = match url_regex.captures(&post_info.community.actor_id) {
+                Some(external_community_link) => external_community_link,
+                None => {
+                    println!("url regex error: {:?}", &post_info.community.actor_id);
+                    url_regex
+                        .captures(&post_info.community.actor_id)
+                        .unwrap_or_else(|| url_regex.captures("https://error.com/c/error").unwrap())
+                }
+            };
+            format!(
+                "{}@{}",
+                post_info.community.name.clone(),
+                &external_community_link[1]
+            )
+        }
+        false => post_info.community.name.clone(),
+    };
+
+    let updater = create_memo(cx, move |_| (id(), local_or_external.clone()));
+
     // Variable that holds the returned GetCommentsResponse from the API
-    let comments = create_resource(cx, id, move |id| async move {
-        // This constructs the proper API URL for GetPosts
-        let url_constructor = ApiUrlConstructor {
-            endpoint: api_endpoints::GetEndpoint::GET_COMMENTS.to_string(),
-            id: Some(id),
-            params: None,
-        };
+    let comments = create_resource(
+        cx,
+        move || updater,
+        move |updater| async move {
+            // This constructs the proper API URL for GetPosts
+            let url_constructor = ApiUrlConstructor {
+                endpoint: api_endpoints::GetEndpoint::GET_COMMENTS.to_string(),
+                id: Some(updater.get().0),
+                params: None,
+            };
 
-        // This assembles the GetComments request form
-        let get_form = GetComments {
-            auth: None,
-            community_id: None,
-            community_name: None,
-            limit: None,
-            max_depth: None,
-            page: None,
-            parent_id: None,
-            post_id: Some(id),
-            saved_only: None,
-            sort: None,
-            type_: None,
-        };
+            // This assembles the GetComments request form
+            let get_form = GetComments {
+                auth: None,
+                community_id: None,
+                community_name: Some(updater.get().1),
+                limit: None,
+                max_depth: None,
+                page: None,
+                parent_id: None,
+                post_id: Some(updater.get().0),
+                saved_only: None,
+                sort: None,
+                type_: None,
+            };
 
-        // This is where the API is called for GetComments and the GetCommentsResponse is returned
-        get_comments(cx, &api_url_builder(cx, url_constructor, get_form))
-            .await
-            .ok()
-    });
+            // This is where the API is called for GetComments and the GetCommentsResponse is returned
+            get_comments(cx, &api_url_builder(cx, url_constructor, get_form))
+                .await
+                .ok()
+        },
+    );
 
     let err_msg = "Error loading these comments: ";
 
     view! { cx,
-        <div class="container overflow-hidden">
+        <div>
         <Transition fallback=move || {
             // Handles the loading screen while waiting for a reply from the API
             view! { cx,
@@ -109,9 +138,14 @@ pub fn CommentItem(cx: Scope, comment_item: MaybeSignal<CommentView>) -> impl In
 
     view! { cx,
         <div>
-            {comment.comment.content}
-            <br />
-            "----------"
+            <div class="card">
+                <div class="card-header">
+                    {comment.creator.name}
+                </div>
+                <div class="card-body">
+                    {comment.comment.content}
+                </div>
+            </div>
         </div>
     }
 }

@@ -2,7 +2,6 @@
 pub mod admin;
 pub mod comment;
 pub mod community;
-pub mod etc;
 pub mod federation;
 pub mod modlog;
 pub mod posts;

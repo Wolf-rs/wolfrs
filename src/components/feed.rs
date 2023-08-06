@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use leptos::*;
 use leptos_router::*;
 
@@ -8,6 +10,7 @@ use crate::api::*;
 use crate::components::pagination::Pagination;
 
 // TODO - feed.rs:
+// Improve support for KBin, which is currently somewhat... Broken
 // onclick functionality for voting, favoriting, crossposting, and reporting
 // Better handling for mobile layouts, including possibly removing voting buttons on mobile
 // Implement community avatars for posts in sensible manner
@@ -42,8 +45,19 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
             .unwrap()
     };
 
+    // Creates the signals needed for handling the tab reactivity on the feed
+    // Needs to be made to ignore/change the tabs when looking at a user or community page feed
+    let (subscribed_active, set_subscribed_active) = create_signal(cx, false);
+    let (local_active, set_local_active) = create_signal(cx, false);
+    let (all_active, set_all_active) = create_signal(cx, true);
+    let (active_tab, set_active_tab) = create_signal(cx, ListingType::All);
+    let subscribed_disabled = true;
+
+    // Creates the derived signal from page and active_tab for the create_resource function below
+    let updater = move || (page(), active_tab.get());
+
     // Variable that holds the returned PostView from the API for either GetPostsResponse or GetPersonDetailsResponse
-    let posts = create_resource(cx, page, move |page| async move {
+    let posts = create_resource(cx, updater, move |updater| async move {
         // This constructs the proper API URL for GetPosts or GetPersonDetails
         let url_constructor = match endpoint {
             "community" | "home" => ApiUrlConstructor {
@@ -67,7 +81,7 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
                     community_id: None,
                     community_name: Some(community_name()),
                     limit: Some(20),
-                    page: Some(page),
+                    page: Some(updater.0),
                     post_id: None,
                     saved_only: None,
                     sort: None,
@@ -78,11 +92,11 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
                     community_id: None,
                     community_name: None,
                     limit: Some(20),
-                    page: Some(page),
+                    page: Some(updater.0),
                     post_id: None,
                     saved_only: None,
                     sort: Some(SortType::Active),
-                    type_: Some(ListingType::All),
+                    type_: Some(updater.1),
                 },
                 &_ => unreachable!(),
             };
@@ -99,7 +113,7 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
             auth: None,
             community_id: None,
             limit: Some(20),
-            page: Some(page),
+            page: Some(updater.0),
             person_id: None,
             saved_only: None,
             sort: None,
@@ -117,8 +131,22 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
     let err_msg = "Error loading this post: ";
 
     view! { cx,
-
-            <div class="container overflow-hidden">
+                <div class="card text-left">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link" class:disabled=move || subscribed_disabled aria-disabled=subscribed_disabled href="#">"Subscribed"</a>
+                        </li>
+                        <li class="nav-item" on:click=move |_| {set_local_active.update(|value| *value = true); set_subscribed_active.update(|value| *value = false); set_all_active.update(|value| *value = false); set_active_tab.update(|value| *value = ListingType::Local)}>
+                            <a class="nav-link" class:active=move || local_active.get() href="#">"Local"</a>
+                        </li>
+                        <li class="nav-item" on:click=move |_| {set_all_active.update(|value| *value = true); set_local_active.update(|value| *value = false); set_subscribed_active.update(|value| *value = false); set_active_tab.update(|value| *value = ListingType::All)}>
+                            <a class="nav-link" class:active=move || all_active.get() href="#">"All"</a>
+                        </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                    <div class="container overflow-hidden">
                 <Transition fallback=move || {
                     // Handles the loading screen while waiting for a reply from the API
                     view! { cx,
@@ -128,23 +156,26 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
                         </div>
                      }
                 }>
-                {move || {
-                    posts
-                        .read(cx)
-                        .map(|res| match res {
-                            None => {
-                                view! { cx, <div>{format!("{err_msg}")}</div> }
-                            }
-                            Some(res) => {
-                                view! { cx,
-                                    <div>
-                                        <PostsList posts=res.into()/>
-                                    </div>
+                    {move || {
+                        posts
+                            .read(cx)
+                            .map(|res| match res {
+                                None => {
+                                    view! { cx, <div>{format!("{err_msg}")}</div> }
                                 }
-                            }
-                        })
-                }}
-                </Transition>
+                                Some(res) => {
+                                    view! { cx,
+                                        <div>
+                                            <FeedList posts=res.into()/>
+                                        </div>
+                                    }
+                                }
+                            })
+                    }}
+                    </Transition>
+                    </div>
+
+                </div>
 
                 <Pagination />
             </div>
@@ -155,11 +186,11 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
 // The Posts list containing the Post items
 // Suggestion: Implement collapsing accordions for multiple posts in a row from the same community in the home feed?
 #[component]
-fn PostsList(cx: Scope, posts: MaybeSignal<Vec<PostView>>) -> impl IntoView {
+fn FeedList(cx: Scope, posts: MaybeSignal<Vec<PostView>>) -> impl IntoView {
     view! { cx,
 
       {posts.get().into_iter()
-        .map(|post| view! { cx, <PostItem post_view=leptos::MaybeSignal::Static(post) />})
+        .map(|post| view! { cx, <FeedItem post_view=leptos::MaybeSignal::Static(post) />})
         .collect_view(cx)}
 
     }
@@ -167,13 +198,14 @@ fn PostsList(cx: Scope, posts: MaybeSignal<Vec<PostView>>) -> impl IntoView {
 
 // The individual Post items, may need to be a seperate component if it grows too large...
 #[component]
-pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
+pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
     // These set the varaibles from the PostView struct to make insetion into the view easier
     let post = post_view.get();
     let post_link = format!("/post/{}", post.post.id);
     // Currently not used, may be used later on
     //let total_votes = post.counts.upvotes - post.counts.downvotes;
     // Checks to see if a post thumbnail exists, if it does not it setts it to a default image
+    // This needs to handle external links as well with the external-link.png file
     let post_thumbnail = match post.post.thumbnail_url {
         Some(_) => post.post.thumbnail_url,
         _ => Option::Some("/static/default_assets/comment.png".to_string()),
@@ -189,10 +221,17 @@ pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
     let creator_link = if post.creator.local {
         format!("/user/{}", post.creator.name)
     } else {
-        let url_regex = regex::Regex::new(r"https:\/\/(.*)\/u\/(.*)").unwrap();
-        let Some(external_creator_link) = url_regex.captures(&post.creator.actor_id) else {
-            unreachable!();
+        let url_regex = regex::Regex::new(r"https://(.*)/u/(.*)").unwrap();
+        let external_creator_link = match url_regex.captures(&post.creator.actor_id) {
+            Some(external_creator_link) => external_creator_link,
+            None => {
+                println!("url regex error: {:?}", &post.creator.actor_id);
+                url_regex
+                    .captures(&post.creator.actor_id)
+                    .unwrap_or_else(|| url_regex.captures("https://error.com/u/error").unwrap())
+            }
         };
+
         format!("/user/{}@{}", post.creator.name, &external_creator_link[1])
     };
     // This needs a similar check as above, I still need to make a default placeholder for a community avatar
@@ -204,10 +243,16 @@ pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
     let community_name = if post.community.local {
         post.community.name.clone()
     } else {
-        let url_regex = regex::Regex::new(r"https:\/\/(.*)\/c\/(.*)").unwrap();
+        let url_regex = regex::Regex::new(r"https://(.*)/c/(.*)").unwrap();
 
-        let Some(external_community_link) = url_regex.captures(&post.community.actor_id) else {
-            unreachable!();
+        let external_community_link = match url_regex.captures(&post.community.actor_id) {
+            Some(external_community_link) => external_community_link,
+            None => {
+                println!("url regex error: {:?}", &post.community.actor_id);
+                url_regex
+                    .captures(&post.community.actor_id)
+                    .unwrap_or_else(|| url_regex.captures("https://error.com/c/error").unwrap())
+            }
         };
         format!(
             "{}@{}",
@@ -218,11 +263,18 @@ pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
     let community_link = if post.community.local {
         format!("/community/{}", post.community.name)
     } else {
-        let url_regex = regex::Regex::new(r"https:\/\/(.*)\/c\/(.*)").unwrap();
+        let url_regex = regex::Regex::new(r"https://(.*)/c/(.*)").unwrap();
 
-        let Some(external_community_link) = url_regex.captures(&post.community.actor_id) else {
-            unreachable!();
+        let external_community_link = match url_regex.captures(&post.community.actor_id) {
+            Some(external_community_link) => external_community_link,
+            None => {
+                println!("url regex error: {:?}", &post.community.actor_id);
+                url_regex
+                    .captures(&post.community.actor_id)
+                    .unwrap_or_else(|| url_regex.captures("https://error.com/c/error").unwrap())
+            }
         };
+
         format!(
             "/community/{}@{}",
             post.community.name, &external_community_link[1]
@@ -239,7 +291,7 @@ pub fn PostItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                 <i class="bi bi-caret-up text-center"></i>
             </div>
             <div class="row">
-            <div class="text-center">
+            <div class="text-center text-nowrap">
             {post.counts.upvotes - post.counts.downvotes}
             </div>
             </div>

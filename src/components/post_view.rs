@@ -5,7 +5,8 @@ use markdown::*;
 use crate::api::posts::get_post;
 use crate::api::structs::*;
 use crate::api::*;
-use crate::components::feed::PostItem;
+use crate::components::comments::Comments;
+use crate::components::feed::FeedItem;
 
 // TODO - post_view.rs:
 // Handle when there is no actual post body for an external link
@@ -72,24 +73,37 @@ pub fn PostView(cx: Scope) -> impl IntoView {
                         view! { cx, <div>{format!("{err_msg}")}</div> }
                     }
                     Some(res) => {
+                        let post_body = match res.post_view.post.body.clone() {
+                            Some(text) => markdown::to_html_with_options(text.as_str(), &Options::gfm()).unwrap(),
+                            None => "".to_string(),
+                        };
 
                         view! { cx,
                             <div>
-                                <div class="row gx-4">
-                                <PostItem post_view=leptos::MaybeSignal::Static(res.post_view.clone()) />
-                            </div>
-                                <Suspense fallback=move || {
-                                    // Handles the loading screen while waiting for a reply from the API
-                                    view! { cx,
-                                        <div class="d-flex align-items-center">
-                                            <h1>Loading...</h1>
-                                            <div class="spinner-grow ms-auto" role="status" aria-hidden="true"></div>
+                                <div>
+                                    <br />
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row gx-4">
+                                                <FeedItem post_view=leptos::MaybeSignal::Static(res.post_view.clone()) />
+                                            </div>
+                                            <Suspense fallback=move || {
+                                                // Handles the loading screen while waiting for a reply from the API
+                                                view! { cx,
+                                                    <div class="d-flex align-items-center">
+                                                        <h1>Loading...</h1>
+                                                        <div class="spinner-grow ms-auto" role="status" aria-hidden="true"></div>
+                                                    </div>
+                                                    }
+                                            }>
+                                                // This is where the Markdown content of the post is rendered.
+                                                <div inner_html=post_body.clone() />
+                                            </Suspense>
                                         </div>
-                                     }
-                                }>
-                                    // This is where the Markdown content of the post is rendered.
-                                    <div inner_html={markdown::to_html_with_options(res.post_view.post.body.clone().unwrap().as_str(), &Options::gfm()).unwrap()} />
-                                </Suspense>
+                                    </div>
+                                </div>
+                                <br />
+                                <Comments post_info=res.post_view.clone() />
                             </div>
                         }
                     }
@@ -97,5 +111,6 @@ pub fn PostView(cx: Scope) -> impl IntoView {
         }}
         </Transition>
         </div>
+
     }
 }

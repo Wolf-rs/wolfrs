@@ -27,7 +27,7 @@ pub fn Post(cx: Scope) -> impl IntoView {
                          }
                     }>
                         <PostView />
-                        <Comments />
+                        //<Comments />
                     </Transition>
                     </div>
 

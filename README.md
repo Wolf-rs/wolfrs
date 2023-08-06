@@ -74,6 +74,8 @@ This project is looking for people who are either familiar with Rust programming
 
 If you are a devloper, please feel free to open a pull request for any additions you would like to add. All contributions that help grow the project are welcome! It is requested that you please document your code when making contributions for Rust or Leptos logic. Bootstrap/CSS styling contributions can simply document what they changed in the commit/pull request message.
 
+There is a [`STATUS`](STATUS.md) file for tracking already implemented features, features being worked on, and things that still need adding. This list is hardly exhaustive, but it is a starting point for centralizing the progress of the project so far. More will be added to this list as time moves along and as the need arises. However, if you implement one of the things marked on the list, when you make a pull-request, mark that item as completed with an `x`, or with a `-` if it is still a WiP feature.
+
 As the project grows, I will look into opening other avenues of communications and organization as needed, such as on Telegram, Discord, etc.
 
 **Important:** It needs to be noted that the Lemmy developers are also working on a Leptos-based UI for Lemmy. Their project was announced some time after I began working on Wolfrs, and is not associated with what I am working on here. Their project is licensed under a fully incompatible license (AGPLv3) with what I chose to release Wolfrs under. Any contributions to Wolfrs shall NOT copy from the Lemmy developers new UI project. It is fine to be _inspired_ by how they did something and implement it yourself, but you absolutely shall not copy their work outright to this project. Any work found to have been copied directly from them will be removed.
