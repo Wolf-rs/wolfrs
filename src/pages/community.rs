@@ -2,7 +2,7 @@ use leptos::*;
 use leptos_router::*;
 
 use crate::api::structs::router_endpoints;
-use crate::components::{comments::Comments, feed::Feed, post_view::PostView};
+use crate::components::{comments::Comments, feed::Feed, post_view::PostView, sidecard::Sidebar};
 
 // TODO - community.rs:
 // Sidecard component still needs to be built
@@ -18,6 +18,7 @@ pub fn Community(cx: Scope) -> impl IntoView {
             <div class="row gx-4">
                 // Feed Column
                 <div class="col-md-9">
+                    <br/>
                     <Transition fallback=move || {
                         // Handles the loading screen while waiting for a reply from the API
                         view! { cx,
@@ -39,10 +40,24 @@ pub fn Community(cx: Scope) -> impl IntoView {
 
                 // Sidecard Column
                 <div class="col-12 col-md-3">
-                    <div style="background-color: #1ea;" class="row gy-4">// <Trending />
-                    </div>
-                    <div style="background-color: #b47;" class="row">// <Sidecard />
-                    </div>
+                    <br/>
+                    <Transition fallback=move || {
+                        // Handles the loading screen while waiting for a reply from the API
+                        view! { cx,
+                            <div class="d-flex align-items-center">
+                                <h1>
+                                    Loading...
+                                </h1>
+                                <div
+                                    class="spinner-grow ms-auto"
+                                    role="status"
+                                    aria-hidden="true"
+                                ></div>
+                            </div>
+                        }
+                    }>
+                        <Sidebar endpoint=router_endpoints::RouterEndpoint::COMMUNITY/>
+                    </Transition>
                 </div>
             </div>
         </div>

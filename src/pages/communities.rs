@@ -124,9 +124,9 @@ pub fn CommunitiesListItem(cx: Scope, communities: Vec<CommunityView>) -> impl I
                     view! { cx,
                         <tr>
                             <td>
-                                <a href=format!(
-                                    "{}", item.community.actor_id
-                                )>{format!("{}", item.community.title)}</a>
+                                <A href=format!(
+                                    "/community/{}", item.community.name
+                                )>{format!("{}", item.community.title)}</A>
                             </td>
                             <td>{format!("{}", item.counts.subscribers)}</td>
                             <td>{format!("{}", item.counts.users_active_month)}</td>

@@ -1442,7 +1442,8 @@ pub struct LocalSite {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct LocalSiteRateLimit {
-    pub comments: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub comments: Option<i32>,
     pub comment_per_second: i32,
     pub id: i32,
     pub image: i32,
@@ -1929,7 +1930,8 @@ pub struct Post {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct PostAggregates {
-    pub comments: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub comments: Option<i32>,
     pub downvotes: i32,
     pub featured_community: bool,
     pub featured_local: bool,
@@ -2316,7 +2318,7 @@ pub struct SearchResponse {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct Site {
-    pub actor_id: i32,
+    pub actor_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub banner: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2340,13 +2342,14 @@ pub struct Site {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Default, Clone)]
 pub struct SiteAggregates {
-    pub comments: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub comments: Option<i32>,
     pub communities: i32,
     pub id: i32,
     pub posts: i32,
     pub site_id: i32,
     pub users: i32,
-    pub users_active_days: i32,
+    pub users_active_day: i32,
     pub users_active_half_year: i32,
     pub users_active_month: i32,
     pub users_active_week: i32,

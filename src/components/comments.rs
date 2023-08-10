@@ -1,5 +1,6 @@
 use leptos::*;
 use leptos_router::*;
+use markdown::*;
 
 use crate::api::comment::*;
 use crate::api::structs::*;
@@ -148,7 +149,13 @@ pub fn CommentItem(cx: Scope, comment_item: MaybeSignal<CommentView>) -> impl In
         <div>
             <div class="card">
                 <div class="card-header">{comment.creator.name}</div>
-                <div class="card-body">{comment.comment.content}</div>
+                <div class="card-body">
+                    <div inner_html=markdown::to_html_with_options(
+                            comment.comment.content.as_str(),
+                            &Options::gfm(),
+                        )
+                        .unwrap()></div>
+                </div>
             </div>
         </div>
     }

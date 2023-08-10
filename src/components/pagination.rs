@@ -27,6 +27,7 @@ pub fn Pagination(cx: Scope) -> impl IntoView {
                             </li>
                         }
                     } else {
+
                         view! { cx,
                             <li class="page-item disabled">
                                 <A class="page-link" href="">

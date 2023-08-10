@@ -153,6 +153,7 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
                             set_active_tab.update(|value| *value = ListingType::Local)
                         }
                     >
+
                         <a class="nav-link" class:active=move || local_active.get() href="#">
                             "Local"
                         </a>
@@ -166,6 +167,7 @@ pub fn Feed(cx: Scope, endpoint: &'static str) -> impl IntoView {
                             set_active_tab.update(|value| *value = ListingType::All)
                         }
                     >
+
                         <a class="nav-link" class:active=move || all_active.get() href="#">
                             "All"
                         </a>
@@ -351,12 +353,12 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                     <div class="col-sm-10">
                         <div class="row">
                             <h5>
-                                <A
+                                <a
                                     href=post_link.clone()
                                     class="link-offset-2 link-underline link-underline-opacity-0"
                                 >
                                     {post_title}
-                                </A>
+                                </a>
                                 {if post_pin {
                                     view! { cx, <i class="bi bi-pin-angle-fill"></i> }
                                 } else {
@@ -368,7 +370,7 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                         <div class="row">
                             <div class="col-sm-12">
                                 <p>
-                                    <A href=creator_link>
+                                    <a href=creator_link>
                                         <img
                                             src=creator_avatar
                                             alt="mdo"
@@ -378,9 +380,9 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                                         />
                                         "  "
                                         {creator_name}
-                                    </A>
+                                    </a>
                                     " in "
-                                    <A href=community_link>
+                                    <a href=community_link>
                                         <img
                                             src=community_avatar
                                             alt="mdo"
@@ -390,13 +392,13 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                                         />
                                         "  "
                                         {community_name}
-                                    </A>
+                                    </a>
                                 </p>
                             </div>
                         </div>
                         <div class="row">
                             <span>
-                                <A
+                                <a
                                     href=post_link
                                     class="link-secondary link-offset-2 link-underline link-underline-opacity-0"
                                 >
@@ -404,7 +406,7 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                                     " "
                                     {comment_count}
                                     " Comments"
-                                </A>
+                                </a>
                                 "   "
                                 <i class="bi bi-bookmark-star text-secondary"></i>
                                 "   "

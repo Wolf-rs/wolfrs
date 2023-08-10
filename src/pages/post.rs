@@ -33,16 +33,11 @@ pub fn Post(cx: Scope) -> impl IntoView {
                         }
                     }>
                         <PostView/>
-                    // <Comments />
                     </Transition>
                 </div>
 
                 // Sidecard Column
-                <div class="col-12 col-md-3">
-                    <div style="background-color: #1ea;" class="row gy-4">// <Trending />
-                    </div>
-                    <div style="background-color: #b47;" class="row">// <Sidecard />
-                    </div>
+                <div class="col-12 col-md-3">// <div class="row"><Sidecard /></div>
                 </div>
             </div>
         </div>

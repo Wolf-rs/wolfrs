@@ -116,7 +116,9 @@ fn FederatedInstancesTables(
                 <table class="table table-dark table-striped">
                     <thead>
                         <tr>
-                            <th colspan="3">"Blocked Instances"</th>
+                            <th colspan="3">
+                                <h3>"Blocked Instances"</h3>
+                            </th>
                         </tr>
                         <tr>
                             <th scope="col">"Domain Name"</th>

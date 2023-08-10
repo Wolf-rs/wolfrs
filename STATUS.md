@@ -23,7 +23,7 @@ This list is not even close to exhaustive and will be expanded upon in time as n
     - #### Get Functionality
       - [x] API functionality
       - [x] Basic feed implemented
-      - [] Sidebar implemented
+      - [x] Sidebar implemented
       - [] Community information and graphics showing
       - [] Improve styling
     - #### Post Functionality
@@ -51,7 +51,7 @@ This list is not even close to exhaustive and will be expanded upon in time as n
       - [x] Support for viewing by Subscribed (Not implemented yet), Local, and All posts
       - [-] Support for media-posts (image viewing when clicking on thumbnail)
       - [] Implemented sorting (active, hot, top by time, etc)
-      - [] Sidebar implemented
+      - [x] Sidebar implemented
       - [] Trending communities box implemented
       - [] Support for server alerts
       - [] Improved styling, especially on mobile
@@ -105,7 +105,7 @@ This list is not even close to exhaustive and will be expanded upon in time as n
       - [x] API Functionality
       - [x] Basic implementation of feed
       - [] Implemented sorting
-      - [] Implemented sidebar for user
+      - [x] Implemented sidebar for user
       - [] Feed for user comments
       - [] Improved styling
     - #### Post/Put Functionality
@@ -178,16 +178,28 @@ This list is not even close to exhaustive and will be expanded upon in time as n
       - [-] Handle posts with no body text (those with external links or media)
       - [] Proper handling of media
       - [-] Improved styling
-      - [] Sidebar implemented
+      - [-] Sidebar implemented
       - [-] Comments added to post_view
     - #### Post/Put Functionality
       - Not started yet
 
   - ### Sidecard.rs
-    - Not started yet
-
-  - ### Trending.rs
-    - Not started yet
+    - #### Get Functionality
+      - [x] Basic Implementation
+      - [x] Support for Home
+        - [x] Trending
+        - [x] Statistics
+        - [x] Instance
+      - [x] Support for Community
+        - [x] Community
+        - [x] Statistics
+      - [x] Support for User
+        - [x] User
+        - [-] Moderated Groups
+        - [x] Statistics
+      - [-] Support for Community on Post page
+        - [-] Community
+        - [] Post statistics
 
 - ## API
 

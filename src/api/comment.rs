@@ -1,4 +1,3 @@
-use anyhow::Result;
 use leptos::Scope;
 
 use crate::api::structs::*;
