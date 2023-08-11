@@ -118,6 +118,7 @@ pub mod router_endpoints {
     impl RouterEndpoint {
         pub const COMMUNITY: &str = "community";
         pub const HOME: &str = "home";
+        pub const POST: &str = "post";
         pub const USER: &str = "user";
     }
 }

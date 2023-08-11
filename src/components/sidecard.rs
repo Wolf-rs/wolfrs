@@ -3,7 +3,7 @@ use leptos_router::*;
 use markdown::*;
 
 use crate::api::community::{get_community, list_communities};
-use crate::api::posts::get_posts;
+use crate::api::posts::{get_post, get_posts};
 use crate::api::site::get_site;
 use crate::api::structs::*;
 use crate::api::user::get_person_details;
@@ -67,7 +67,7 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
         let err_msg = "Error loading this post: ";
 
         view! { cx,
-            <div class="card text-left">
+            <div class="text-left">
                 <Transition fallback=move || {
                     // Handles the loading screen while waiting for a reply from the API
                     view! { cx,
@@ -119,7 +119,7 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
                                                     />
                                                 </div>
                                                 <div class="card-body">
-                                                    <h4 class="card-title text-center text-nowrap">
+                                                    <h4 class="card-title text-center">
                                                         {res.community_view.community.title}
                                                     </h4>
                                                     <hr/>
@@ -129,6 +129,7 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
                                                     <ul class="list-group list-group-flush">
                                                         {res
                                                             .moderators
+                                                            .clone()
                                                             .into_iter()
                                                             .map(|moderator| {
                                                                 view! { cx,
@@ -167,6 +168,7 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
                                                 </div>
                                             </div>
                                             <br/>
+                                            // Community Statistics Card
                                             <div class="card text-left">
                                                 <div class="card-header">
                                                     <h5 class="card-title text-center">"Statistics"</h5>
@@ -191,8 +193,7 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
                                                                     <div class="vr"></div>
                                                                 </td>
                                                                 <td>
-                                                                    {format!("{} Communities", res.community_view.counts.posts)}
-
+                                                                    {format!("{} Posts", res.community_view.counts.posts)}
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -200,12 +201,13 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
                                                                     {format!(
                                                                         "{} / Day", res.community_view.counts.users_active_day
                                                                     )}
+
                                                                 </td>
                                                                 <td>
                                                                     <div class="vr"></div>
                                                                 </td>
                                                                 <td>
-                                                                    {format!("{} Posts", res.community_view.counts.posts)}
+                                                                    {format!("{} Comments", res.community_view.counts.comments)}
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -219,9 +221,9 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
                                                                     <div class="vr"></div>
                                                                 </td>
                                                                 <td>
-                                                                    {format!(
-                                                                        "{:?} Comments", res.community_view.counts.comments
-                                                                    )}
+                                                                    // This should eventually become the rank of the community on the Instance
+                                                                    // This will be for another time...
+                                                                    {format!("{:?} Moderators", res.moderators.clone().len())}
 
                                                                 </td>
                                                             </tr>
@@ -425,6 +427,210 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
                 </Transition>
             </div>
         }
+    } else if endpoint.eq("post") {
+        let sidebar = create_resource(cx, page, move |page| async move {
+            // This constructs the proper API URL for GetPosts or GetPersonDetails
+            let url_constructor = ApiUrlConstructor {
+                endpoint: api_endpoints::GetEndpoint::GET_POST.to_string(),
+                id: None,
+                params: None,
+            };
+
+            let get_form = GetPost {
+                auth: None,
+                comment_id: None,
+                id: Some(post_id()),
+            };
+
+            get_post(cx, &api_url_builder(cx, url_constructor, get_form))
+                .await
+                .ok()
+        });
+
+        let err_msg = "Error loading this post: ";
+
+        view! { cx,
+            <div class="text-left">
+                <Transition fallback=move || {
+                    // Handles the loading screen while waiting for a reply from the API
+                    view! { cx,
+                        <div class="d-flex align-items-center">
+                            <h1>
+                                Loading...
+                            </h1>
+                            <div
+                                class="spinner-grow ms-auto"
+                                role="status"
+                                aria-hidden="true"
+                            ></div>
+                        </div>
+                    }
+                }>
+                    {move || {
+                        sidebar
+                            .read(cx)
+                            .map(|res| match res {
+                                None => {
+                                    view! { cx, <div>{format!("{err_msg}")}</div> }
+                                }
+                                Some(res) => {
+                                    let sidebar = match res
+                                        .community_view
+                                        .community
+                                        .description
+                                        .clone()
+                                    {
+                                        Some(text) => {
+                                            markdown::to_html_with_options(
+                                                    text.as_str(),
+                                                    &Options::gfm(),
+                                                )
+                                                .unwrap()
+                                        }
+                                        None => "".to_string(),
+                                    };
+                                    let banner_image = match res.community_view.community.banner {
+                                        Some(_) => res.community_view.community.banner,
+                                        _ => {
+                                            Option::Some(
+                                                "/static/default_assets/default-community.png".to_string(),
+                                            )
+                                        }
+                                    };
+
+                                    view! { cx,
+                                        <div>
+                                            // Community sidecard
+                                            <div class="card text-left">
+                                                <div class="card-header">
+                                                    <img
+                                                        src=banner_image
+                                                        class="card-img-top"
+                                                        alt="Banner for the Lemmy instance"
+                                                    />
+                                                </div>
+                                                <div class="card-body">
+                                                    <h4 class="card-title text-center">
+                                                        {res.community_view.community.title}
+                                                    </h4>
+                                                    <hr/>
+                                                    <div inner_html=sidebar></div>
+                                                    <hr/>
+                                                    <h6>"Moderators"</h6>
+                                                    <ul class="list-group list-group-flush">
+                                                        {res
+                                                            .moderators
+                                                            .clone()
+                                                            .into_iter()
+                                                            .map(|moderator| {
+                                                                view! { cx,
+                                                                    // Checks to see if a user has an avatar set, if not it assigns a default one
+
+                                                                    {
+                                                                        let admin_avatar = match moderator.moderator.avatar {
+                                                                            Some(_) => moderator.moderator.avatar,
+                                                                            _ => {
+                                                                                Option::Some(
+                                                                                    "/static/default_assets/default-profile.png".to_string(),
+                                                                                )
+                                                                            }
+                                                                        };
+
+                                                                        view! { cx,
+                                                                            <li class="list-group-item">
+                                                                                <a href=format!("/user/{}", moderator.moderator.name)>
+                                                                                    <img
+                                                                                        src=admin_avatar
+                                                                                        alt="mdo"
+                                                                                        width="32"
+                                                                                        height="32"
+                                                                                        class="rounded"
+                                                                                    />
+                                                                                    "  "
+                                                                                    {moderator.moderator.name}
+                                                                                </a>
+                                                                            </li>
+                                                                        }
+                                                                    }
+                                                                }
+                                                            })
+                                                            .collect::<Vec<_>>()}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <br/>
+                                            // Community Statistics Card
+                                            <div class="card text-left">
+                                                <div class="card-header">
+                                                    <h5 class="card-title text-center">"Statistics"</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <table class="table table-dark">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">"Users"</th>
+                                                                <th scope="col">
+                                                                    <div class="vr"></div>
+                                                                </th>
+                                                                <th scope="col">"Activity"</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>
+                                                                    {format!("{} Users", res.community_view.counts.subscribers)}
+                                                                </td>
+                                                                <td>
+                                                                    <div class="vr"></div>
+                                                                </td>
+                                                                <td>
+                                                                    {format!("{} Posts", res.community_view.counts.posts)}
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    {format!(
+                                                                        "{} / Day", res.community_view.counts.users_active_day
+                                                                    )}
+
+                                                                </td>
+                                                                <td>
+                                                                    <div class="vr"></div>
+                                                                </td>
+                                                                <td>
+                                                                    {format!("{} Comments", res.community_view.counts.comments)}
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    {format!(
+                                                                        "{} / Month", res.community_view.counts.users_active_month
+                                                                    )}
+
+                                                                </td>
+                                                                <td>
+                                                                    <div class="vr"></div>
+                                                                </td>
+                                                                <td>
+                                                                    // This should eventually become the rank of the community on the Instance
+                                                                    // This will be for another time...
+                                                                    {format!("{:?} Moderators", res.moderators.clone().len())}
+
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            })
+                    }}
+
+                </Transition>
+            </div>
+        }
     } else if endpoint.eq("user") {
         let sidebar = create_resource(cx, page, move |page| async move {
             // This constructs the proper API URL for GetPosts or GetPersonDetails
@@ -453,7 +659,7 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
         let err_msg = "Error loading this post: ";
 
         view! { cx,
-            <div class="card text-left">
+            <div class="text-left">
                 <Transition fallback=move || {
                     // Handles the loading screen while waiting for a reply from the API
                     view! { cx,
@@ -500,52 +706,79 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
                                                     />
                                                 </div>
                                                 <div class="card-body">
-                                                    <h4 class="card-title text-center text-nowrap">
-                                                        {res.person_view.person.name}
-                                                    </h4>
-                                                    <hr/>
-                                                    <div inner_html=sidebar></div>
-                                                    <hr/>
-                                                // Need to add showing what groups someone moderates, if any.
-                                                // <h6>"Moderates"</h6>
-                                                // <ul class="list-group list-group-flush">
-                                                // {res
-                                                // .admins
-                                                // .into_iter()
-                                                // .map(|admin| {
-                                                // view! { cx,
-                                                // 
 
-                                                // {
-                                                // let admin_avatar = match admin.person.avatar {
-                                                // Some(_) => admin.person.avatar,
-                                                // _ => {
-                                                // Option::Some(
-                                                // "/static/default_assets/default-profile.png".to_string(),
-                                                // )
-                                                // }
-                                                // };
+                                                    {if !res.person_view.person.display_name.is_none() {
+                                                        view! { cx,
+                                                            <h4 class="card-title text-center">
+                                                                {res.person_view.person.display_name}
+                                                            </h4>
+                                                        }
+                                                    } else {
 
-                                                // view! { cx,
-                                                // <li class="list-group-item">
-                                                // <a href=format!("/user/{}", admin.person.name)>
-                                                // <img
-                                                // src=admin_avatar
-                                                // alt="mdo"
-                                                // width="32"
-                                                // height="32"
-                                                // class="rounded"
-                                                // />
-                                                // "  "
-                                                // {admin.person.name}
-                                                // </a>
-                                                // </li>
-                                                // }
-                                                // }
-                                                // }
-                                                // })
-                                                // .collect::<Vec<_>>()}
-                                                // </ul>
+                                                        view! { cx,
+                                                            <h4 class="card-title text-center text-nowrap">
+                                                                {res.person_view.person.name}
+                                                            </h4>
+                                                        }
+                                                    }}
+                                                    <hr/> <div inner_html=sidebar></div> <hr/>
+                                                    {if !res.moderates.is_empty() {
+                                                        view! { cx,
+                                                            <div>
+                                                                <h6>"Moderates"</h6>
+                                                                <ul class="list-group list-group-flush">
+                                                                    {res
+                                                                        .moderates
+                                                                        .clone()
+                                                                        .into_iter()
+                                                                        .map(|community| {
+                                                                            view! { cx,
+                                                                                // Checks to see if a user has an avatar set, if not it assigns a default one
+
+                                                                                {
+                                                                                    let community_avatar = match community.community.icon {
+                                                                                        Some(_) => community.community.icon,
+                                                                                        _ => {
+                                                                                            Option::Some(
+                                                                                                "/static/default_assets/default-profile.png".to_string(),
+                                                                                            )
+                                                                                        }
+                                                                                    };
+
+                                                                                    view! { cx,
+                                                                                        <li class="list-group-item">
+                                                                                            <a href=format!("/community/{}", community.community.name)>
+                                                                                                <img
+                                                                                                    src=community_avatar
+                                                                                                    alt="mdo"
+                                                                                                    width="32"
+                                                                                                    height="32"
+                                                                                                    class="rounded"
+                                                                                                />
+                                                                                                "  "
+                                                                                                {community.community.title}
+                                                                                            </a>
+                                                                                        </li>
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        })
+                                                                        .collect::<Vec<_>>()}
+                                                                </ul>
+                                                            </div>
+                                                        }
+                                                    } else {
+                                                        // Checks to see if a user has an avatar set, if not it assigns a default one
+
+                                                        // Checks to see if a user has an avatar set, if not it assigns a default one
+
+                                                        // Checks to see if a user has an avatar set, if not it assigns a default one
+
+                                                        // Checks to see if a user has an avatar set, if not it assigns a default one
+
+                                                        view! { cx, <div></div> }
+                                                    }}
+
                                                 </div>
                                             </div>
                                             <br/>
@@ -573,7 +806,8 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
                                                                 <td>
                                                                     <div class="vr"></div>
                                                                 </td>
-                                                                <td>{format!("{} Karma", res.person_view.counts.post_score)}
+                                                                <td>
+                                                                    {format!("{} Karma", res.person_view.counts.post_score)}
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -581,6 +815,7 @@ pub fn Sidebar(cx: Scope, endpoint: &'static str) -> impl IntoView {
                                                                     {format!(
                                                                         "{} Comments", res.person_view.counts.comment_count
                                                                     )}
+
                                                                 </td>
                                                                 <td>
                                                                     <div class="vr"></div>
