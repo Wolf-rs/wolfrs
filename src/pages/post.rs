@@ -1,8 +1,10 @@
 use leptos::*;
 use leptos_router::*;
 
-use crate::api::structs::router_endpoints;
-use crate::components::{comments::Comments, post_view::PostView, sidecard::Sidebar};
+use crate::api::posts::get_post;
+use crate::api::structs::*;
+use crate::api::*;
+use crate::components::{post_view::PostView, sidecards::post::Sidecard};
 
 // TODO - post.rs:
 // Sidecard component still needs to be built
@@ -13,6 +15,37 @@ use crate::components::{comments::Comments, post_view::PostView, sidecard::Sideb
 
 #[component]
 pub fn Post(cx: Scope) -> impl IntoView {
+    let params = use_params_map(cx);
+    let id = move || {
+        params
+            .with(|params| params.get("id").cloned())
+            .unwrap_or_default()
+            .parse::<i32>()
+            .unwrap()
+    };
+
+    // Variable that holds the returned GetPostResponse from the API
+    let post = create_resource(cx, id, move |id| async move {
+        // This constructs the proper API URL for GetPosts
+        let url_constructor = ApiUrlConstructor {
+            endpoint: api_endpoints::GetEndpoint::GET_POST.to_string(),
+            id: Some(id),
+            params: None,
+        };
+
+        // This assembles the GetPost request form
+        let get_form = GetPost {
+            auth: None,
+            comment_id: None,
+            id: Some(id),
+        };
+
+        // This is where the API is called for GetPost and the GetPostResponse is returned
+        get_post(cx, &api_url_builder(cx, url_constructor, get_form))
+            .await
+            .ok()
+    });
+
     view! { cx,
         <div class="container overflow-hidden">
             <div class="row gx-4">
@@ -33,7 +66,7 @@ pub fn Post(cx: Scope) -> impl IntoView {
                             </div>
                         }
                     }>
-                        <PostView/>
+                        <PostView post=post/>
                     </Transition>
                 </div>
 
@@ -55,7 +88,7 @@ pub fn Post(cx: Scope) -> impl IntoView {
                             </div>
                         }
                     }>
-                        <Sidebar endpoint=router_endpoints::RouterEndpoint::POST/>
+                        <Sidecard sidebar=post/>
                     </Transition>
                 </div>
             </div>

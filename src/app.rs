@@ -66,17 +66,25 @@ pub fn App(cx: Scope) -> impl IntoView {
                     <Route path="/" view=|cx| view! { cx, <Home/> }/>
                     <Route path="/communities" view=|cx| view! { cx, <Communities/> }/>
                     <Route path="/community/:community_name" view=|cx| view! { cx, <Community/> }/>
+                    // Fallback to support typical Lemmy /c/ url's
+                    <Route path="/c/:community_name" view=|cx| view! { cx, <Community/> }/>
                     // <Route path="/create_community" view=|cx| view! { cx, <CreateCommunity/> }/>
                     // <Route path="/create_post" view=|cx| view! { cx, <CreatePost/> }/>
                     <Route path="/federation" view=|cx| view! { cx, <FederatedInstancesList/> }/>
+                    // Fallback to support typical URL for Lemmy federated instances view
+                    <Route path="/instances" view=|cx| view! { cx, <FederatedInstancesList/> }/>
                     // <Route path="/login" view=|cx| view! { cx, <Login/> }/>
-                    <Route path="/mod_log" view=|cx| view! { cx, <ModLog/> }/>
+                    <Route path="/modlog" view=|cx| view! { cx, <ModLog/> }/>
                     // <Route path="/notifications" view=|cx| view! { cx, <Notifications/> }/>
                     <Route path="/post/:id" view=|cx| view! { cx, <Post/> }/>
+                    // Fallback for accidental usage of /p/ url's
+                    <Route path="/p/:id" view=|cx| view! { cx, <Post/> }/>
                     // <Route path="/reports" view=|cx| view! { cx, <Reports/> }/>
                     // <Route path="/search" view=|cx| view! { cx, <Search/> }/>
                     // <Route path="/settings" view=|cx| view! { cx, <Settings/> }/>
                     <Route path="/user/:username" view=|cx| view! { cx, <User/> }/>
+                    // Fallback to support typical Lemmy /u/ url's
+                    <Route path="/u/:username" view=|cx| view! { cx, <User/> }/>
                 </Routes>
             </main>
             <Footer/>

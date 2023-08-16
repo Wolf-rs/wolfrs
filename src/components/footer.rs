@@ -33,7 +33,7 @@ pub fn Footer(cx: Scope) -> impl IntoView {
 
                 <ul class="nav col-md-5 justify-content-end">
                     <li class="nav-item">
-                        <a href="/mod_log" class="nav-link px-2 text-body-secondary">
+                        <a href="/modlog" class="nav-link px-2 text-body-secondary">
                             {"Modlog"}
                         </a>
                     </li>

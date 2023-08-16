@@ -2,9 +2,7 @@ use leptos::*;
 use leptos_router::*;
 use markdown::*;
 
-use crate::api::posts::get_post;
 use crate::api::structs::*;
-use crate::api::*;
 use crate::components::comments::Comments;
 use crate::components::feed::FeedItem;
 
@@ -20,38 +18,7 @@ use crate::components::feed::FeedItem;
 
 // The component box that holds the post body and contents itself
 #[component]
-pub fn PostView(cx: Scope) -> impl IntoView {
-    let params = use_params_map(cx);
-    let id = move || {
-        params
-            .with(|params| params.get("id").cloned())
-            .unwrap_or_default()
-            .parse::<i32>()
-            .unwrap()
-    };
-
-    // Variable that holds the returned GetPostResponse from the API
-    let post = create_resource(cx, id, move |id| async move {
-        // This constructs the proper API URL for GetPosts
-        let url_constructor = ApiUrlConstructor {
-            endpoint: api_endpoints::GetEndpoint::GET_POST.to_string(),
-            id: Some(id),
-            params: None,
-        };
-
-        // This assembles the GetPost request form
-        let get_form = GetPost {
-            auth: None,
-            comment_id: None,
-            id: Some(id),
-        };
-
-        // This is where the API is called for GetPost and the GetPostResponse is returned
-        get_post(cx, &api_url_builder(cx, url_constructor, get_form))
-            .await
-            .ok()
-    });
-
+pub fn PostView(cx: Scope, post: Resource<i32, Option<GetPostResponse>>) -> impl IntoView {
     let err_msg = "Error loading this post: ";
 
     view! { cx,
@@ -96,7 +63,7 @@ pub fn PostView(cx: Scope) -> impl IntoView {
                                                             res.post_view.clone(),
                                                         )/>
                                                     </div>
-                                                    <Suspense fallback=move || {
+                                                    <Transition fallback=move || {
                                                         // Handles the loading screen while waiting for a reply from the API
                                                         view! { cx,
                                                             <div class="d-flex align-items-center">
@@ -113,12 +80,29 @@ pub fn PostView(cx: Scope) -> impl IntoView {
                                                     }>
                                                         // This is where the Markdown content of the post is rendered.
                                                         <div inner_html=post_body.clone()></div>
-                                                    </Suspense>
+                                                    </Transition>
                                                 </div>
                                             </div>
                                         </div>
                                         <br/>
-                                        <Comments post_info=res.post_view.clone()/>
+                                        <Transition fallback=move || {
+                                            // Handles the loading screen while waiting for a reply from the API
+                                            view! { cx,
+                                                <div class="d-flex align-items-center">
+                                                    <h1>
+                                                        Loading...
+                                                    </h1>
+                                                    <div
+                                                        class="spinner-grow ms-auto"
+                                                        role="status"
+                                                        aria-hidden="true"
+                                                    ></div>
+                                                </div>
+                                            }
+                                        }>
+                                            // This is where the Markdown content of the post is rendered.
+                                            <Comments post_info=res.post_view.clone()/>
+                                        </Transition>
                                     </div>
                                 }
                             }

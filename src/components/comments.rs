@@ -49,41 +49,37 @@ pub fn Comments(cx: Scope, post_info: PostView) -> impl IntoView {
         false => post_info.community.name.clone(),
     };
 
-    let updater = create_memo(cx, move |_| (id(), local_or_external.clone()));
+    let updater = move || (id(), local_or_external.clone());
 
     // Variable that holds the returned GetCommentsResponse from the API
-    let comments = create_resource(
-        cx,
-        move || updater,
-        move |updater| async move {
-            // This constructs the proper API URL for GetPosts
-            let url_constructor = ApiUrlConstructor {
-                endpoint: api_endpoints::GetEndpoint::GET_COMMENTS.to_string(),
-                id: Some(updater.get().0),
-                params: None,
-            };
+    let comments = create_resource(cx, updater, move |updater| async move {
+        // This constructs the proper API URL for GetPosts
+        let url_constructor = ApiUrlConstructor {
+            endpoint: api_endpoints::GetEndpoint::GET_COMMENTS.to_string(),
+            id: Some(updater.0),
+            params: None,
+        };
 
-            // This assembles the GetComments request form
-            let get_form = GetComments {
-                auth: None,
-                community_id: None,
-                community_name: Some(updater.get().1),
-                limit: None,
-                max_depth: None,
-                page: None,
-                parent_id: None,
-                post_id: Some(updater.get().0),
-                saved_only: None,
-                sort: None,
-                type_: None,
-            };
+        // This assembles the GetComments request form
+        let get_form = GetComments {
+            auth: None,
+            community_id: None,
+            community_name: Some(updater.1),
+            limit: None,
+            max_depth: None,
+            page: None,
+            parent_id: None,
+            post_id: Some(updater.0),
+            saved_only: None,
+            sort: None,
+            type_: None,
+        };
 
-            // This is where the API is called for GetComments and the GetCommentsResponse is returned
-            get_comments(cx, &api_url_builder(cx, url_constructor, get_form))
-                .await
-                .ok()
-        },
-    );
+        // This is where the API is called for GetComments and the GetCommentsResponse is returned
+        get_comments(cx, &api_url_builder(cx, url_constructor, get_form))
+            .await
+            .ok()
+    });
 
     let err_msg = "Error loading these comments: ";
 

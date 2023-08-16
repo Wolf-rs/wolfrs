@@ -25,6 +25,7 @@ pub fn api_url_builder<T: Serializable + serde::Serialize>(
 ) -> String {
     let params_str =
         serde_html_form::to_string(&form).unwrap_or(url_constructor.endpoint.to_string());
+    //leptos::log!("Test in mod.rs: API URL Constructor");
     format!(
         "{}/api/{}/{}?{}",
         get_instance_details().unwrap().url,
@@ -51,19 +52,22 @@ where
         .text()
         .await?;
 
-    // abort in-flight requests if the Scope is disposed
-    // i.e., if we've navigated away from this page
+    //abort in-flight requests if the Scope is disposed
+    //i.e., if we've navigated away from this page
     leptos::on_cleanup(cx, move || {
         if let Some(abort_controller) = abort_controller {
             abort_controller.abort()
         }
     });
 
-    // This really isn't good... It has no error handling, but the way it was handled below kept returning false(?) Err even though the data was there
-    Ok(Response::de(&json).unwrap())
+    //Use this to test JSON outputs before unwrapping in case of errors
+    //leptos::log!("Test in CSR mod.rs: {:#?}", json.clone());
 
-    // Return the error response json as an error
-    //Response::de(&json).map_err(|_| anyhow!(json.clone()))
+    //This really isn't good... It has no error handling, but the way it was handled below kept returning false(?) Err even though the data was there
+    //Ok(Response::de(&json).unwrap())
+
+    //Return the error response json as an error
+    Response::de(&json).map_err(|_| anyhow!(json.clone()))
 }
 
 #[cfg(feature = "ssr")]
@@ -78,9 +82,13 @@ where
     // Use this to test JSON outputs before unwrapping in case of errors
     // println!("Test in mod.rs: {:#?}", json.clone());
 
+    //leptos::log!("Test in mod.rs: {:#?}", json.clone());
+
     // This really isn't good... It has no error handling, but the way it was handled below kept returning false(?) Err even though the data was there
-    Ok(Response::de(&json).unwrap())
+    //Ok(Response::de(&json).unwrap())
+
+    //leptos::log!("Test in SSR mod.rs: {:#?}", json.clone());
 
     // Return the error response json as an error
-    //Response::de(&json).map_err(|_| anyhow!(json.clone()))
+    Response::de(&json).map_err(|_| anyhow!(json.clone()))
 }

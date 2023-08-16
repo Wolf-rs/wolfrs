@@ -2,7 +2,7 @@ use leptos::*;
 use leptos_router::*;
 
 use crate::api::structs::router_endpoints;
-use crate::components::{comments::Comments, feed::Feed, post_view::PostView, sidecard::Sidebar};
+use crate::components::{feed::Feed, sidecards::community::Sidecard};
 
 // TODO - community.rs:
 // Sidecard component still needs to be built
@@ -56,7 +56,7 @@ pub fn Community(cx: Scope) -> impl IntoView {
                             </div>
                         }
                     }>
-                        <Sidebar endpoint=router_endpoints::RouterEndpoint::COMMUNITY/>
+                        <Sidecard/>
                     </Transition>
                 </div>
             </div>
