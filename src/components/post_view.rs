@@ -1,4 +1,5 @@
 use leptos::*;
+use leptos_meta::*;
 use leptos_router::*;
 use markdown::*;
 
@@ -79,7 +80,7 @@ pub fn PostView(cx: Scope, post: Resource<i32, Option<GetPostResponse>>) -> impl
                                                         }
                                                     }>
                                                         // This is where the Markdown content of the post is rendered.
-                                                        <div inner_html=post_body.clone()></div>
+                                                        <div class="markdown" inner_html=post_body.clone()></div>
                                                     </Transition>
                                                 </div>
                                             </div>

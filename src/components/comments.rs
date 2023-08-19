@@ -141,12 +141,46 @@ fn CommentsList(cx: Scope, comments: MaybeSignal<Vec<CommentView>>) -> impl Into
 pub fn CommentItem(cx: Scope, comment_item: MaybeSignal<CommentView>) -> impl IntoView {
     let comment = comment_item.get();
 
+    let creator_link = if comment.creator.local {
+        format!("/user/{}", comment.creator.name)
+    } else {
+        let url_regex = regex::Regex::new(r"https://(.*)/u/(.*)").unwrap();
+        let external_creator_link = match url_regex.captures(&comment.creator.actor_id) {
+            Some(external_creator_link) => external_creator_link,
+            None => {
+                println!("url regex error: {:?}", &comment.creator.actor_id);
+                url_regex
+                    .captures(&comment.creator.actor_id)
+                    .unwrap_or_else(|| url_regex.captures("https://error.com/u/error").unwrap())
+            }
+        };
+
+        format!(
+            "/user/{}@{}",
+            comment.creator.name, &external_creator_link[1]
+        )
+    };
+
+    // Checks to see if a user has an avatar set, if not it assigns a default one
+    let creator_avatar = match comment.creator.avatar {
+        Some(_) => comment.creator.avatar,
+        _ => Option::Some("/static/default_assets/default-profile.png".to_string()),
+    };
+
     view! { cx,
         <div>
             <div class="card">
-                <div class="card-header">{comment.creator.name}</div>
+                <div class="card-header"><a href={format!("{}", creator_link)}><img
+                src=creator_avatar
+                alt="mdo"
+                width="32"
+                height="32"
+                class="rounded"
+            />
+            "  "
+            {comment.creator.name}</a></div>
                 <div class="card-body">
-                    <div inner_html=markdown::to_html_with_options(
+                    <div class="markdown" inner_html=markdown::to_html_with_options(
                             comment.comment.content.as_str(),
                             &Options::gfm(),
                         )

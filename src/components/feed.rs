@@ -11,9 +11,6 @@ use crate::components::pagination::Pagination;
 // Improve support for KBin, which is currently somewhat... Broken
 // onclick functionality for voting, favoriting, crossposting, and reporting
 // Better handling for mobile layouts, including possibly removing voting buttons on mobile
-// Implement community avatars for posts in sensible manner
-// Build media popups for images
-// Implement URL preview images for external links (This seems to already be handled by the backend?)
 // Finish fleshing out PostItem for stuff like language, edited status, date, etc
 
 // The feed column that shows the Posts list, used for Home, Community, and User pages
@@ -235,23 +232,31 @@ fn FeedList(cx: Scope, posts: MaybeSignal<Vec<PostView>>) -> impl IntoView {
 pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
     // These set the varaibles from the PostView struct to make insetion into the view easier
     let post = post_view.get();
+
     let post_link = format!("/post/{}", post.post.id);
+
     // Currently not used, may be used later on
     //let total_votes = post.counts.upvotes - post.counts.downvotes;
+
     // Checks to see if a post thumbnail exists, if it does not it setts it to a default image
     // This needs to handle external links as well with the external-link.png file
     let post_thumbnail = match post.post.thumbnail_url {
         Some(_) => post.post.thumbnail_url,
         _ => Option::Some("/static/default_assets/comment.png".to_string()),
     };
+
     let post_title = post.post.name;
+
     let post_pin = post.post.featured_local;
+
     // Checks to see if a user has an avatar set, if not it assigns a default one
     let creator_avatar = match post.creator.avatar {
         Some(_) => post.creator.avatar,
         _ => Option::Some("/static/default_assets/default-profile.png".to_string()),
     };
+
     let creator_name = post.creator.name.clone();
+
     let creator_link = if post.creator.local {
         format!("/user/{}", post.creator.name)
     } else {
@@ -268,11 +273,13 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
 
         format!("/user/{}@{}", post.creator.name, &external_creator_link[1])
     };
+
     // This needs a similar check as above, I still need to make a default placeholder for a community avatar
     let community_avatar = match post.community.icon {
         Some(_) => post.community.icon,
         _ => Option::Some("/static/default_assets/default-community.png".to_string()),
     };
+
     // This needs to be handled better, it thinks that some local communities are external, possibly due to cross-posting?
     let community_name = if post.community.local {
         post.community.name.clone()
@@ -294,6 +301,7 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
             &external_community_link[1]
         )
     };
+
     let community_link = if post.community.local {
         format!("/community/{}", post.community.name)
     } else {
@@ -314,6 +322,7 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
             post.community.name, &external_community_link[1]
         )
     };
+
     let comment_count = post.counts.comments;
 
     view! { cx,
@@ -340,11 +349,9 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                         <div style="">
                             <img
                                 src=post_thumbnail
-                                width="75"
-                                height="75"
-                                class="rounded"
+                                class="rounded overflow-hidden"
                                 alt="..."
-                                style=""
+                                style="max-width: 75px; max-height: 75px;"
                             />
                         </div>
                     </div>
@@ -379,7 +386,7 @@ pub fn FeedItem(cx: Scope, post_view: MaybeSignal<PostView>) -> impl IntoView {
                                         "  "
                                         {creator_name}
                                     </a>
-                                    " in "
+                                    " | "
                                     <a href=community_link>
                                         <img
                                             src=community_avatar

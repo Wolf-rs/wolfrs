@@ -43,18 +43,43 @@ pub fn Sidecard(
                                     None => "".to_string(),
                                 };
 
+                                let icon_image = match res.person_view.person.avatar {
+                                    Some(_) => res.person_view.person.avatar,
+                                    _ => {
+                                        Option::Some(
+                                            "/static/default_assets/default-community.png".to_string(),
+                                        )
+                                    }
+                                };
+
+                                let banner_image = match res.person_view.person.banner {
+                                    Some(_) => res.person_view.person.banner,
+                                    _ => {
+                                        Option::Some(
+                                            "/static/default_assets/banners/wolfrs-default-user-banner.png".to_string(),
+                                        )
+                                    }
+                                };
+
                                 view! { cx,
                                     <div>
                                         // User sidecard
                                         <div class="card text-left">
-                                            <div class="card-header">
-                                                <img
-                                                    src=res.person_view.person.avatar
-                                                    class="card-img-top"
-                                                    alt="Banner for the Lemmy instance"
-                                                />
-                                            </div>
-                                            <div class="card-body">
+                                        <div class="card-header">
+                                        <img
+                                            src=banner_image
+                                            class="card-img-top"
+                                            alt="Community banner"
+                                        />
+                                    </div>
+                                    <div class="card-body">
+                                        <img
+                                            src=icon_image
+                                            class="img-fluid rounded"
+                                            alt="Icon for the community"
+                                        />
+                                        <br/>
+                                        <br/>
 
                                                 {if !res.person_view.person.display_name.is_none() {
                                                     view! { cx,
@@ -70,7 +95,7 @@ pub fn Sidecard(
                                                         </h4>
                                                     }
                                                 }}
-                                                <hr/> <div inner_html=sidebar></div> <hr/>
+                                                <hr/> <div class="markdown" inner_html=sidebar></div> <hr/>
                                                 {if !res.moderates.is_empty() {
                                                     view! { cx,
                                                         <div>
@@ -142,6 +167,8 @@ pub fn Sidecard(
                                                         </div>
                                                     }
                                                 } else {
+                                                    // Checks to see if a user has an avatar set, if not it assigns a default one
+
                                                     // Checks to see if a user has an avatar set, if not it assigns a default one
 
                                                     // Checks to see if a user has an avatar set, if not it assigns a default one

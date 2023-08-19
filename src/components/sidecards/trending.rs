@@ -99,13 +99,16 @@ fn TrendingCommunityItems(cx: Scope, communities: Vec<CommunityView>) -> impl In
     view! { cx,
         <table class="table table-dark">
             <tbody>
-                {communities
+                {   let mut ranking = 0;
+
+                    communities
                     .into_iter()
                     .map(|item| {
+                        ranking += 1;
                         view! { cx,
                             <tr>
                                 <td>
-                                    <a href=format!(
+                                    {format!("{:?}. ", ranking)}<a href=format!(
                                         "/community/{}", item.community.name
                                     )>{format!("{}", item.community.title)}</a>
                                 </td>

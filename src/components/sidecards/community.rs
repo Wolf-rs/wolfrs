@@ -78,6 +78,23 @@ pub fn Sidecard(cx: Scope) -> impl IntoView {
                                     }
                                     None => "".to_string(),
                                 };
+                                let icon_image = match res.community_view.community.icon {
+                                    Some(_) => res.community_view.community.icon,
+                                    _ => {
+                                        Option::Some(
+                                            "/static/default_assets/default-community.png".to_string(),
+                                        )
+                                    }
+                                };
+                                let banner_image = match res.community_view.community.banner {
+                                    Some(_) => res.community_view.community.banner,
+                                    _ => {
+                                        Option::Some(
+                                            "/static/default_assets/banners/wolfrs-default-community-banner.png"
+                                                .to_string(),
+                                        )
+                                    }
+                                };
 
                                 view! { cx,
                                     <div>
@@ -85,17 +102,24 @@ pub fn Sidecard(cx: Scope) -> impl IntoView {
                                         <div class="card text-left">
                                             <div class="card-header">
                                                 <img
-                                                    src=res.community_view.community.banner
+                                                    src=banner_image
                                                     class="card-img-top"
-                                                    alt="Banner for the Lemmy instance"
+                                                    alt="Community banner"
                                                 />
                                             </div>
                                             <div class="card-body">
+                                                <img
+                                                    src=icon_image
+                                                    class="img-fluid rounded"
+                                                    alt="Icon for the community"
+                                                />
+                                                <br/>
+                                                <br/>
                                                 <h4 class="card-title text-center">
                                                     {res.community_view.community.title}
                                                 </h4>
                                                 <hr/>
-                                                <div inner_html=sidebar></div>
+                                                <div class="markdown" inner_html=sidebar></div>
                                                 <hr/>
                                                 <h6>"Moderators"</h6>
                                                 <ul class="list-group list-group-flush">

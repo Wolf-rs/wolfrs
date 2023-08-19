@@ -47,7 +47,7 @@ pub fn App(cx: Scope) -> impl IntoView {
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
         />
         <Style>
-            "body {display: flex; min-height: 100vh; flex-direction: column;} main {flex: 1 0 auto;}"
+            "body {display: flex; min-height: 100vh; flex-direction: column;} main {flex: 1 0 auto;} .markdown>p>img {height: auto; max-width: 100%;}"
         </Style>
 
         // Dynamically sets the title of the page based on the name and slogan defined in the Instance.toml file
