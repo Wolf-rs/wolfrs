@@ -100,10 +100,18 @@ pub fn CommunitiesList(cx: Scope, communities: Vec<CommunityView>) -> impl IntoV
                         </tr>
                         <tr>
                             <th scope="col">"Name"</th>
-                            <th scope="col">"Subscribers"</th>
-                            <th scope="col">"Active Users"</th>
-                            <th scope="col">"Posts"</th>
-                            <th scope="col">"Comments"</th>
+                            <th class="text-center" scope="col">
+                                "Subscribers"
+                            </th>
+                            <th class="text-center" scope="col">
+                                "Monthly Active Users"
+                            </th>
+                            <th class="text-center" scope="col">
+                                "Posts"
+                            </th>
+                            <th class="text-center" scope="col">
+                                "Comments"
+                            </th>
                             <th scope="col">"Subscription"</th>
                         </tr>
                     </thead>
@@ -121,17 +129,34 @@ pub fn CommunitiesListItem(cx: Scope, communities: Vec<CommunityView>) -> impl I
             {communities
                 .into_iter()
                 .map(|item| {
+                    let community_avatar = match item.community.icon {
+                        Some(_) => item.community.icon,
+                        _ => {
+                            Option::Some("/static/default_assets/default-community.png".to_string())
+                        }
+                    };
+
                     view! { cx,
                         <tr>
                             <td>
-                                <A href=format!(
-                                    "/community/{}", item.community.name
-                                )>{format!("{}", item.community.title)}</A>
+                                <A href=format!("/community/{}", item.community.name)>
+                                    <img
+                                        src=community_avatar
+                                        alt="mdo"
+                                        width="32"
+                                        height="32"
+                                        class="rounded"
+                                    />
+                                    "  "
+                                    {format!("{}", item.community.title)}
+                                </A>
                             </td>
-                            <td>{format!("{}", item.counts.subscribers)}</td>
-                            <td>{format!("{}", item.counts.users_active_month)}</td>
-                            <td>{format!("{}", item.counts.posts)}</td>
-                            <td>{format!("{}", item.counts.comments)}</td>
+                            <td class="text-center">{format!("{}", item.counts.subscribers)}</td>
+                            <td class="text-center">
+                                {format!("{}", item.counts.users_active_month)}
+                            </td>
+                            <td class="text-center">{format!("{}", item.counts.posts)}</td>
+                            <td class="text-center">{format!("{}", item.counts.comments)}</td>
                             // Needs to be dynamic and allow for subscribing from here?
                             <td>{format!("{:?}", item.subscribed)}</td>
                         </tr>

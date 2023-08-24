@@ -170,21 +170,22 @@ pub fn CommentItem(cx: Scope, comment_item: MaybeSignal<CommentView>) -> impl In
     view! { cx,
         <div>
             <div class="card">
-                <div class="card-header"><a href={format!("{}", creator_link)}><img
-                src=creator_avatar
-                alt="mdo"
-                width="32"
-                height="32"
-                class="rounded"
-            />
-            "  "
-            {comment.creator.name}</a></div>
+                <div class="card-header">
+                    <a href=format!("{}", creator_link)>
+                        <img src=creator_avatar alt="mdo" width="32" height="32" class="rounded"/>
+                        "  "
+                        {comment.creator.name}
+                    </a>
+                </div>
                 <div class="card-body">
-                    <div class="markdown" inner_html=markdown::to_html_with_options(
-                            comment.comment.content.as_str(),
-                            &Options::gfm(),
-                        )
-                        .unwrap()></div>
+                    <div
+                        class="markdown"
+                        inner_html=markdown::to_html_with_options(
+                                comment.comment.content.as_str(),
+                                &Options::gfm(),
+                            )
+                            .unwrap()
+                    ></div>
                 </div>
             </div>
         </div>

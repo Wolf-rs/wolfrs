@@ -58,12 +58,12 @@ pub fn PostView(cx: Scope, post: Resource<i32, Option<GetPostResponse>>) -> impl
                                         <div>
                                             <br/>
                                             <div class="card">
+                                                <div class="card-header pb-0">
+                                                    <FeedItem post_view=leptos::MaybeSignal::Static(
+                                                        res.post_view.clone(),
+                                                    )/>
+                                                </div>
                                                 <div class="card-body">
-                                                    <div class="row gx-4">
-                                                        <FeedItem post_view=leptos::MaybeSignal::Static(
-                                                            res.post_view.clone(),
-                                                        )/>
-                                                    </div>
                                                     <Transition fallback=move || {
                                                         // Handles the loading screen while waiting for a reply from the API
                                                         view! { cx,

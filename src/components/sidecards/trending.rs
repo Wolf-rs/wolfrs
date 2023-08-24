@@ -99,23 +99,44 @@ fn TrendingCommunityItems(cx: Scope, communities: Vec<CommunityView>) -> impl In
     view! { cx,
         <table class="table table-dark">
             <tbody>
-                {   let mut ranking = 0;
 
+                {
+                    let mut ranking = 0;
                     communities
-                    .into_iter()
-                    .map(|item| {
-                        ranking += 1;
-                        view! { cx,
-                            <tr>
-                                <td>
-                                    {format!("{:?}. ", ranking)}<a href=format!(
-                                        "/community/{}", item.community.name
-                                    )>{format!("{}", item.community.title)}</a>
-                                </td>
-                            </tr>
-                        }
-                    })
-                    .collect_view(cx)}
+                        .into_iter()
+                        .map(|item| {
+                            ranking += 1;
+                            let community_avatar = match item.community.icon {
+                                Some(_) => item.community.icon,
+                                _ => {
+                                    Option::Some(
+                                        "/static/default_assets/default-community.png".to_string(),
+                                    )
+                                }
+                            };
+
+                            view! { cx,
+                                <tr>
+                                    <td>
+                                        {format!("{:?}. ", ranking)}
+                                        <a href=format!("/community/{}", item.community.name)>
+                                            <img
+                                                src=community_avatar
+                                                alt="mdo"
+                                                width="32"
+                                                height="32"
+                                                class="rounded"
+                                            />
+                                            "  "
+                                            {format!("{}", item.community.title)}
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        })
+                        .collect_view(cx)
+                }
+
             </tbody>
         </table>
     }

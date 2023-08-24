@@ -65,7 +65,6 @@ pub fn Sidecard(cx: Scope) -> impl IntoView {
                                     }
                                     None => "".to_string(),
                                 };
-
                                 let icon_image = match res.site_view.site.icon {
                                     Some(_) => res.site_view.site.icon,
                                     _ => {
@@ -74,12 +73,12 @@ pub fn Sidecard(cx: Scope) -> impl IntoView {
                                         )
                                     }
                                 };
-
                                 let banner_image = match res.site_view.site.banner {
                                     Some(_) => res.site_view.site.banner,
                                     _ => {
                                         Option::Some(
-                                            "/static/default_assets/banners/wolfrs-default-instance-banner.png".to_string(),
+                                            "/static/default_assets/banners/wolfrs-default-instance-banner.png"
+                                                .to_string(),
                                         )
                                     }
                                 };
@@ -88,21 +87,21 @@ pub fn Sidecard(cx: Scope) -> impl IntoView {
                                     <div>
                                         // Instance sidecard
                                         <div class="card text-left">
-                                        <div class="card-header">
-                                        <img
-                                            src=banner_image
-                                            class="card-img-top"
-                                            alt="Community banner"
-                                        />
-                                    </div>
-                                    <div class="card-body">
-                                        <img
-                                            src=icon_image
-                                            class="img-fluid rounded"
-                                            alt="Icon for the community"
-                                        />
-                                        <br/>
-                                        <br/>
+                                            <div class="card-header">
+                                                <img
+                                                    src=banner_image
+                                                    class="card-img-top"
+                                                    alt="Community banner"
+                                                />
+                                            </div>
+                                            <div class="card-body">
+                                                <img
+                                                    src=icon_image
+                                                    class="img-fluid rounded"
+                                                    alt="Icon for the community"
+                                                />
+                                                <br/>
+                                                <br/>
                                                 <h4 class="card-title text-center text-nowrap">
                                                     {res.site_view.site.name}
                                                 </h4>

@@ -78,14 +78,41 @@ pub fn Header(cx: Scope) -> impl IntoView {
                     </ul>
                     <div class="row">
                         <div class="col">
-                            <a class="btn btn-primary" href="/search" role="button">
-                                <div class="row">
-                                    <div class="col col-sm-12">
-                                        <i class="bi bi-search"></i>
+                            // <a class="btn btn-primary" href="/search" role="button">
+                            // <div class="row">
+                            // <div class="col col-sm-12">
+                            // <i class="bi bi-search"></i>
+                            // </div>
+                            // <div class="col col-sm-0"></div>
+                            // </div>
+                            // </a>
+                            <div class="dropdown">
+                                <button
+                                    type="button"
+                                    class="btn btn-primary dropdown-toggle"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                    data-bs-auto-close="outside"
+                                >
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <form class="dropdown-menu p-4">
+                                    <div class="mb-3">
+                                        <label for="searchBox" class="form-label">
+                                            "Search Lemmy"
+                                        </label>
+                                        <input
+                                            type="search"
+                                            class="form-control"
+                                            id="searchBox"
+                                            placeholder="Enter search text here..."
+                                        />
                                     </div>
-                                    <div class="col col-sm-0"></div>
-                                </div>
-                            </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                         <div class="col">
                             <a class="btn btn-primary" href="/notifications" role="button">
